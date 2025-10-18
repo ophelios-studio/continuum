@@ -8,6 +8,7 @@ use Zephyrus\Application\Controller as BaseController;
 use Models\Core\Application;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Flash;
+use Zephyrus\Network\ContentType;
 use Zephyrus\Network\Response;
 use Zephyrus\Security\ContentSecurityPolicy;
 use Zephyrus\Security\SecureHeader;
@@ -81,6 +82,11 @@ abstract class Controller extends BaseController
     protected function modalError(array $errorMessages = [], array $data = []): Response
     {
         return $this->json(array_merge(['status' => 'error', 'errors' => $errorMessages], $data));
+    }
+
+    protected function jsonError(int $code, string $message): Response
+    {
+        return $this->abort($code, json_encode(['error' => $message]), ContentType::JSON);
     }
 
     protected function setupSecurityHeaders(SecureHeader $secureHeader): void
