@@ -4,6 +4,9 @@ primary_region = 'yyz'
 [build]
   dockerfile = '.flyio/Dockerfile'
 
+[deploy]
+  release_command = "composer update"
+
 [[mounts]]
   source = 'pg_data'
   destination = '/data'
