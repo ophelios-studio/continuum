@@ -5,7 +5,7 @@ use Zephyrus\Application\Form;
 use Zephyrus\Application\Rule;
 use Zephyrus\Exceptions\FormException;
 
-class SubmitterValidator
+class ActorValidator
 {
     public static function assertInsert(Form $form): void
     {

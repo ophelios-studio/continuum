@@ -1,6 +1,6 @@
 <?php namespace Models\Account;
 
-use Models\Account\Brokers\SubmitterBroker;
+use Models\Account\Brokers\ActorBroker;
 use Zephyrus\Application\Rule;
 
 class AccountRules
@@ -11,7 +11,7 @@ class AccountRules
             if ($currentEmail == $value) {
                 return true;
             }
-            return !new SubmitterBroker()->emailExists($value);
+            return !new ActorBroker()->emailExists($value);
         }, localize("accounts.errors.email_unavailable"));
     }
 }

@@ -4,24 +4,25 @@ use Models\Core\Broker;
 use stdClass;
 use Zephyrus\Security\Cryptography;
 
-class SubmitterBroker extends Broker
+class ActorBroker extends Broker
 {
     public function findByAddress(string $address): ?stdClass
     {
-        $sql = "SELECT * FROM account.submitter WHERE address = ?";
+        $sql = "SELECT * FROM account.actor WHERE address = ?";
         return $this->selectSingle($sql, [$address]);
     }
 
     public function insert(stdClass $new): string
     {
         $verificationToken = Cryptography::randomString(64);
-        $sql = "INSERT INTO account.submitter(address, firstname, lastname, email, jurisdiction, profile_hash, organization_id, verification_token) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO account.actor(address, firstname, lastname, email, primary_role, jurisdiction, profile_hash, organization_id, verification_token) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->query($sql, [
             $new->address,
             $new->firstname,
             $new->lastname,
             $new->email,
+            $new->primary_role,
             $new->jurisdiction,
             $this->canonicalJson($new),
             null,
@@ -33,7 +34,7 @@ class SubmitterBroker extends Broker
     public function updateEmail(string $address, string $newEmail): string
     {
         $verificationToken = Cryptography::randomString(64);
-        $sql = "UPDATE account.submitter 
+        $sql = "UPDATE account.actor 
                    SET email = ?, 
                        verification_token = ? 
                  WHERE address = ?";
@@ -43,7 +44,7 @@ class SubmitterBroker extends Broker
 
     public function emailExists(string $email): bool
     {
-        $sql = "SELECT COUNT(address) as n FROM account.submitter WHERE email = ?";
+        $sql = "SELECT COUNT(address) as n FROM account.actor WHERE email = ?";
         return $this->selectSingle($sql, [$email])->n > 0;
     }
 
@@ -52,8 +53,8 @@ class SubmitterBroker extends Broker
         $ordered = [
             'version' => 1,
             'address' => strtolower($new->address),
-            'firstName' => $new->firstName,
-            'lastName' => $new->lastName,
+            'firstName' => $new->firstname,
+            'lastName' => $new->lastname,
             'email' => $new->email,
             'jurisdiction' => $new->jurisdiction,
             'nonce' => bin2hex(random_bytes(16)),
