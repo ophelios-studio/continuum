@@ -1,0 +1,129 @@
+{layout ../layouts/app.latte}
+
+{block body}
+    <style>
+        .gradient-background {
+            background: linear-gradient(300deg, #2572d6, #615ac0, #cc497a);
+            background-size: 200% 200%;
+            animation: gradient-animation 18s ease infinite;
+        }
+
+        .gradient-background:before {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 1px 1px, black 1px, transparent 0);
+            background-size: 8px 8px;
+            opacity: 0.1;
+            z-index: 50;
+        }
+
+        @keyframes gradient-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: var(--tblr-font-weight-black);
+            letter-spacing: -0.04em;
+            line-height: 1.2;
+        }
+        @media (max-width: 767.98px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
+
+        .hero-description {
+            color: var(--tblr-secondary);
+            font-size: var(--tblr-font-size-h2);
+            line-height: 1.5;
+            margin: 0 auto;
+            max-width: 45rem;
+        }
+        @media (max-width: 575.98px) {
+            .hero-description {
+                font-size: var(--tblr-font-size-h3);
+            }
+        }
+
+        .hero-subheader {
+            font-size: 0.75rem;
+            font-weight: var(--tblr-font-weight-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1rem;
+            color: var(--tblr-secondary);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+    <div class="row g-0 flex-fill h-100">
+        <div class="col-12 col-lg-6 col-xl-4 d-flex flex-column justify-content-between">
+            <div class="d-flex justify-content-center align-items-center flex-grow-1">
+                <div class="container container-tight my-5 px-lg-5">
+                    <div class="text-center mb-6">
+                        <picture class="hide-theme-light">
+                          <source srcset="/assets/images/logo-horizontal-white.png" />
+                          <img src="/assets/images/logo-horizontal.png" alt="Company logo" style="height: 120px; width: auto;" />
+                        </picture>
+                        <picture class="hide-theme-dark">
+                          <source srcset="/assets/images/logo-horizontal.png" />
+                          <img src="/assets/images/logo-horizontal.png" alt="Company logo" style="height: 120px; width: auto;" />
+                        </picture>
+                    </div>
+                    {block content}{/block}
+                </div>
+            </div>
+            <div class="text-center text-muted fs-5 mx-6 my-6">
+                Copyright &copy; 2025, Ophelios. All rights reserved.
+                <div class="mt-2 d-lg-none">Version 1.0.0</div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-6 col-xl-8 d-none d-lg-block">
+            {* style="background-image: url({asset('/assets/images/background-login-2.svg')})" *}
+            <div class="gradient-background h-100 bg-cover min-vh-100">
+                <div class="d-flex flex-column justify-content-between h-100 position-relative" style="z-index: 100;">
+                    <div class="d-flex justify-content-center align-items-center flex-grow-1">
+                        <div class="px-6">
+                            <div class="hero-subheader text-white-50">Legal Integrity</div>
+                            <h1 class="hero-title text-white">
+                                The digital chain of custody,<br />
+                                <span class="text-dark" id="typed"></span>
+                            </h1>
+                            <p class="hero-description mt-4 text-white-50">
+                                On-chain chain-of-custody protocol that keeps digital and physical evidence verifiable, encrypted, and traceable through every handoff. It bridges the gap between legal integrity and blockchain automation, ensuring every transfer of proof remains transparent, auditable, and tamper-proof.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-end text-white-50 fs-5 mx-6 my-6 d-flex align-items-center justify-content-end">
+                        Version 1.0.0
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/javascripts/vendor/typed-2.1.0/typed.umd.js"></script>
+    <script nonce="{nonce()}">
+        document.addEventListener("DOMContentLoaded", function () {
+            new Typed("#typed", {
+                strings: ["for digital and physical evidence", "verifiable on the blockchain", "unbroken audit trail of trust", "evidence files are encrypted", "continuous and tamper-proof"],
+                typeSpeed: 40,
+                backSpeed: 30,
+                backDelay: 4000,
+                startDelay: 500,
+                loop: true,
+                fade: true,
+            });
+        });
+    </script>
+{/block}
