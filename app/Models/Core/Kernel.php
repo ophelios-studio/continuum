@@ -39,6 +39,6 @@ final class Kernel extends \Zephyrus\Core\Kernel
 
     private function initializeBaseAuthorizations(): void
     {
-        AuthorizationRepository::getInstance()->addSessionRule('authenticated', 'user');
+        AuthorizationRepository::getInstance()->addSessionRule('authenticated', 'wallet');
     }
 }
