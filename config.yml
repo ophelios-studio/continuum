@@ -1,0 +1,54 @@
+application:
+  debug: !env DEBUG
+  project: "Continuum"
+  contact_email: "info@ophelios.com"
+  version: "0.0.0"
+  locales:
+    - en_CA
+
+locale:
+  currency: "CAD"
+  timezone: "America/Montreal"
+  charset: "utf8"
+  locale: "en_CA"
+
+mailer:
+  transport: !env MAILER_TRANSPORT
+  default_from_address: "info@ophelios.com"
+  default_from_name: "Continuum"
+  smtp:
+    enabled: true
+    host: !env MAILER_HOST
+    port: !env MAILER_PORT
+    encryption: !env MAILER_ENCRYPTION
+    username: !env MAILER_USERNAME
+    password: !env MAILER_PASSWORD
+
+database:
+  hostname: !env DB_HOSTNAME
+  username: !env DB_USERNAME
+  password: !env DB_PASSWORD
+  database: !env DB_NAME
+  search_paths:
+    - public
+
+render:
+  engine: "latte"
+  cache_update: !env CACHE_UPDATE
+
+session:
+  storage: "database"
+  table: "public.session"
+  encrypted: false
+  lifetime: 28800
+  auto_start: true
+
+security:
+  encryption:
+    key: !env ENCRYPTION_KEY
+  csrf:
+    enabled: true
+    exceptions: ['\/api.*']
+  ids:
+    enabled: true
+    impact_threshold: 50
