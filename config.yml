@@ -36,6 +36,10 @@ render:
   engine: "latte"
   cache_update: !env CACHE_UPDATE
 
+services:
+  infura:
+    eth_url: !env INFURA_ETH_URL
+
 session:
   storage: "database"
   table: "public.session"
