@@ -1,0 +1,31 @@
+{
+  "accounts": {
+    "errors": {
+      "email_unavailable": "An account already exists for the given <b>email address</b>. Please provide a different email address or login using your existing account.",
+      "firstname_required": "The <b>firstname</b> must not be empty.",
+      "firstname_invalid": "The <b>firstname</b> contains invalid characters.",
+      "lastname_required": "The <b>lastname</b> must not be empty.",
+      "lastname_invalid": "The <b>lastname</b> contains invalid characters.",
+      "email_required": "The <b>email</b> must not be empty.",
+      "email_invalid": "The <b>email</b> is invalid.",
+      "agree_required": "You must agree to the <b>terms and policy</b> before registering."
+    },
+
+    "success": {
+      "created": "Your submitter account <b>{wallet}</b> has been successfully created 🎉. You must confirm your email address ({email}) before you can access the submitter features. Please check your email for the confirmation link.",
+      "confirmed": "Your submitter account <b>{wallet}</b> has been confirmed for the email address {email} 🎉. You may now submit new evidences or cases."
+    },
+
+    "emails": {
+      "activation": {
+        "subject": "👋 Welcome {fullname} - Activate Your Account",
+        "title": "👋 Welcome",
+        "description": "Dear {fullname}, <br><br>We are excited to welcome you to our platform! You're just one step away from unlocking the full experience. Please activate your account by clicking the link below:",
+        "information": "If the activation link doesn't work, copy and paste the following URL into your browser: {activation_url}. If you have any questions or need assistance, feel free to reach out to us at {support_email}.",
+        "labels": {
+          "activate": "Activate My Account"
+        }
+      }
+    }
+  }
+}
