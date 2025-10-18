@@ -5,14 +5,11 @@ use Zephyrus\Database\DatabaseBroker;
 
 abstract class Broker extends DatabaseBroker
 {
-    private Application $application;
-
-    /**
-     * @param Application $application
-     */
-    public function __construct(Application $application)
+    public function __construct(private ?Application $application = null)
     {
-        $this->application = $application;
+        if (is_null($application)) {
+            $application = Application::getInstance();
+        }
         parent::__construct($application->getDatabase());
     }
 
