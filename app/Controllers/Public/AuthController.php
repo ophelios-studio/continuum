@@ -37,7 +37,7 @@ class AuthController extends Controller
 
         $verifier = new SiweVerifier(
             allowedDomains: [$this->request->getUrl()->getHost()],
-            allowedOrigins: [$this->request->getUrl()->getScheme() . '://' . $this->request->getUrl()->getHost()],
+            allowedOrigins: [$this->request->getUrl()->getBaseUrl()],
             allowedChainIds: [1, 11155111] // mainnet and Sepolia
         );
         try {
