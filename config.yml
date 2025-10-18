@@ -48,7 +48,7 @@ security:
     key: !env ENCRYPTION_KEY
   csrf:
     enabled: true
-    exceptions: ['\/api.*']
+    exceptions: ['\/auth\/siwe.*']
   ids:
     enabled: true
     impact_threshold: 50
