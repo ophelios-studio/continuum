@@ -36,6 +36,7 @@
     "ophelios/pulsar-components": "dev-main",
     "ophelios/pulsar-forms": "dev-main",
     "ophelios/pulsar-mailer": "dev-main",
+    "ophelios/php-ethereum-ens": "0.1.*",
     "kornrunner/keccak": "^1.1",
     "simplito/elliptic-php": "^1.0",
     "ext-json": "*",
