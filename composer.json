@@ -37,6 +37,7 @@
     "ophelios/pulsar-forms": "dev-main",
     "ophelios/pulsar-mailer": "dev-main",
     "kornrunner/keccak": "^1.1",
+    "simplito/elliptic-php": "^1.0",
     "ext-json": "*",
     "ext-fileinfo": "*",
     "ext-zip": "*",
