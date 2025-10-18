@@ -25,6 +25,9 @@ class ActorValidator
         $form->field('juridiction', [
             Rule::required(localize("accounts.errors.juridiction_required")),
         ]);
+        $form->field('primary_role', [
+            Rule::required(localize("accounts.errors.primary_role_required")),
+        ]);
         $form->field('agree', [
             Rule::required(localize("accounts.errors.agree_required"))
         ]);

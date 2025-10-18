@@ -5,6 +5,7 @@
       "firstname_required": "The <b>firstname</b> must not be empty.",
       "firstname_invalid": "The <b>firstname</b> contains invalid characters.",
       "lastname_required": "The <b>lastname</b> must not be empty.",
+      "primary_role_required": "The <b>primary role</b> must not be empty.",
       "lastname_invalid": "The <b>lastname</b> contains invalid characters.",
       "email_required": "The <b>email</b> must not be empty.",
       "email_invalid": "The <b>email</b> is invalid.",
