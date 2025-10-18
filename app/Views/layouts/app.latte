@@ -1,0 +1,40 @@
+{import ../pulsar/components/flash.latte}
+{import ../pulsar/components/undraw.latte}
+{import ../pulsar/components/alert.latte}
+{import ../pulsar/components/avatar.latte}
+{import ../pulsar/components/modal.latte}
+{import ../pulsar/components/offcanvas.latte}
+{import ../pulsar/components/peity.latte}
+{import ../pulsar/components/toggle.latte}
+{import ../pulsar/components/button.latte}
+
+{import ../pulsar/forms/field.latte}
+{import ../pulsar/forms/text.latte}
+{import ../pulsar/forms/password.latte}
+{import ../pulsar/forms/checkbox.latte}
+{import ../pulsar/forms/pincode.latte}
+{import ../pulsar/forms/icon-picker.latte}
+{import ../pulsar/forms/textarea.latte}
+{import ../pulsar/forms/select.latte}
+
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    {include components/favicon.latte}
+    {block meta}{/block}
+    <title>Code Quill</title>
+    {include components/stylesheets.latte}
+    {include components/javascripts.latte}
+    {block css}{/block}
+</head>
+<body>
+    {block body}{/block}
+    {block modals}{/block}
+    <script src="/javascripts/pulsar/vendor/tabler-1.4.0/tabler.min.js"></script>
+    <script src="/javascripts/pulsar/vendor/js-confetti/confetti.min.js"></script>
+    {block js}{/block}
+</body>
+</html>
