@@ -1,6 +1,8 @@
 {layout ../layouts/app.latte}
 
 {varType string $wallet}
+{varType ?string $ens_name}
+{varType ?string $ens_avatar}
 
 {block body}
     <div class="page">
@@ -50,9 +52,9 @@
                     </div>
                     <div class="ms-2 nav-item dropdown">
                         <a href="#" class="nav-link d-flex lh-1 p-0 px-2 dropdown-toggle" data-bs-toggle="dropdown" aria-label="Open user menu">
-                            {include "zf-avatar-image", "/assets/images/avatars/" . "", [size: "sm"]}
+                            {include "zf-avatar-image", "/assets/images/avatars/" . $ens_avatar, [size: "sm"]}
                             <div class="d-none d-xl-block ps-2">
-                                <div>dadajuice.booe.eth</div>
+                                <div>{$ens_name}</div>
                                 <div n:if="$wallet" class="mt-1 small text-secondary"><span class="status-dot status-green me-1"></span>{format('wallet', $wallet)}</div>
                             </div>
                         </a>

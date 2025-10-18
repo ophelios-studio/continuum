@@ -1,8 +1,11 @@
 <?php namespace Controllers\Public;
 
 use Controllers\Controller;
+use Ens\EnsService;
 use Models\Application\SiweVerifier;
+use Models\Application\AvatarDownloader;
 use Throwable;
+use Zephyrus\Core\Configuration;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
@@ -45,6 +48,17 @@ class AuthController extends Controller
             Session::remove('siwe_nonce');
             Session::set('wallet', $result['address']);
             Session::set('auth_at', time());
+            $rpcUrl = Configuration::read('services')['infura']['eth_url'];
+            $ens = new EnsService($rpcUrl);
+            $name = $ens->resolveEnsName($result['address']);
+            if ($name) {
+                Session::set('ens_name', $name);
+                $avatar = $ens->resolveAvatar($name);
+                if ($avatar) {
+                    $resultAvatar = new AvatarDownloader($avatar)->download(md5($avatar));
+                    Session::set('ens_avatar', $resultAvatar);
+                }
+            }
             return $this->json(['address' => $result['address']]);
         } catch (Throwable $e) {
             return $this->jsonError(401, $e->getMessage());
