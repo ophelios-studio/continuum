@@ -1,9 +1,13 @@
 <?php namespace Controllers\Application;
 
 use Controllers\Controller;
+use Models\Account\Entities\Actor;
+use Models\Core\Application;
+use Zephyrus\Application\Flash;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Authorize;
+use Zephyrus\Utilities\MaskFormat;
 
 #[Authorize("authenticated")]
 abstract class AppController extends Controller
@@ -12,6 +16,12 @@ abstract class AppController extends Controller
     {
         if (is_null(Session::get('actor'))) {
             return $this->redirect("/signup");
+        }
+        $actor = Actor::build(Session::get('actor'));
+        if ($actor->verification_token) {
+            Application::getInstance()->getSession()->restart();
+            Flash::error(localize("accounts.errors.not_verified", ['email' => MaskFormat::email($actor->email)]));
+            return $this->redirect("/login");
         }
         return parent::before();
     }

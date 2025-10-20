@@ -6,14 +6,16 @@
       "firstname_invalid": "The <b>firstname</b> contains invalid characters.",
       "lastname_required": "The <b>lastname</b> must not be empty.",
       "primary_role_required": "The <b>primary role</b> must not be empty.",
+      "jurisdiction_required": "The <b>jurisdiction</b> must not be empty.",
       "lastname_invalid": "The <b>lastname</b> contains invalid characters.",
       "email_required": "The <b>email</b> must not be empty.",
       "email_invalid": "The <b>email</b> is invalid.",
-      "agree_required": "You must agree to the <b>terms and policy</b> before registering."
+      "agree_required": "You must agree to the <b>terms and policy</b> before registering.",
+      "not_verified": "Check {email} for a verification email to verify ownership of this wallet and continue."
     },
 
     "success": {
-      "created": "Your submitter account <b>{wallet}</b> has been successfully created 🎉. You must confirm your email address ({email}) before you can access the submitter features. Please check your email for the confirmation link.",
+      "created": "Your account associated with the wallet <b>{wallet}</b> has been successfully created 🎉. You must confirm your email address ({email}) before you can access the application. Please check your email for the confirmation link.",
       "confirmed": "Your submitter account <b>{wallet}</b> has been confirmed for the email address {email} 🎉. You may now submit new evidences or cases."
     },
 
