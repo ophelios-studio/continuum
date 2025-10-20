@@ -42,10 +42,6 @@ readonly class AvatarDownloader
         }
 
         $dir = ROOT_DIR . '/public/assets/images/avatars';
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0775, true);
-        }
-
         @file_put_contents($dir . '/' . $target, $avatarContent);
         return $target;
     }
