@@ -9,7 +9,7 @@ use Zephyrus\Core\Session;
 readonly class ActorService
 {
     public function __construct(
-        private ActorBroker $broker
+        private ActorBroker $broker = new ActorBroker()
     ) {}
 
     public function findByAddress(string $address): ?Actor
