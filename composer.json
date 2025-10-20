@@ -40,6 +40,8 @@
     "kornrunner/keccak": "^1.1",
     "simplito/elliptic-php": "^1.0",
     "usarise/identicon": "^0.8.2",
+    "web3p/web3.php": "0.3.2",
+    "web3p/ethereum-tx": "0.4.3",
     "ext-json": "*",
     "ext-fileinfo": "*",
     "ext-zip": "*",
