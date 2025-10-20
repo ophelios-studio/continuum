@@ -47,4 +47,20 @@ class SignupController extends Controller
         ]));
         return $this->redirect("/login");
     }
+
+    #[Get("/signup-activation/{code}")]
+    public function signupActivation(string $code): Response
+    {
+        $service = new ActorService();
+        $actor = $service->authenticateByActivationCode($code);
+        if (is_null($actor)) {
+            Application::getInstance()->getSession()->restart();
+            Flash::error(localize("accounts.errors.activation_invalid"));
+            return $this->redirect("/login");
+        }
+        $service->activate($actor);
+        Application::getInstance()->getSession()->restart();
+        Flash::success(localize("accounts.success.activation", ['wallet' => format('wallet', $actor->address)]));
+        return $this->redirect("/login");
+    }
 }

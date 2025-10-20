@@ -16,4 +16,9 @@ class Actor extends Entity
     public ?string $verification_token;
     public string $created_at;
     public string $updated_at;
+
+    public function getFullName(): string
+    {
+        return $this->firstname . ' ' . $this->lastname;
+    }
 }

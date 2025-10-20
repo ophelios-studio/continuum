@@ -1,5 +1,6 @@
 <?php namespace Models\Account\Brokers;
 
+use Models\Account\Entities\Actor;
 use Models\Core\Broker;
 use stdClass;
 use Zephyrus\Security\Cryptography;
@@ -12,11 +13,23 @@ class ActorBroker extends Broker
         return $this->selectSingle($sql, [$address]);
     }
 
-    public function insert(stdClass $new): string
+    public function findByActivationCode(string $confirmationToken): ?stdClass
+    {
+        $sql = "SELECT * 
+                  FROM account.actor 
+                 WHERE verification_token = ?";
+        $actor = $this->selectSingle($sql, [$confirmationToken]);
+        if (is_null($actor)) {
+            return null;
+        }
+        return $this->findByAddress($actor->address);
+    }
+
+    public function insert(stdClass $new, string $level = 'DECLARED'): string
     {
         $verificationToken = Cryptography::randomString(64);
-        $sql = "INSERT INTO account.actor(address, firstname, lastname, email, primary_role, jurisdiction, profile_hash, organization_id, verification_token) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO account.actor(address, firstname, lastname, email, primary_role, jurisdiction, profile_hash, organization_id, verification_token, level) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->query($sql, [
             $new->address,
             $new->firstname,
@@ -26,7 +39,8 @@ class ActorBroker extends Broker
             $new->jurisdiction,
             $this->canonicalJson($new),
             null,
-            $verificationToken
+            $verificationToken,
+            $level
         ]);
         return $verificationToken;
     }
@@ -46,6 +60,16 @@ class ActorBroker extends Broker
     {
         $sql = "SELECT COUNT(address) as n FROM account.actor WHERE email = ?";
         return $this->selectSingle($sql, [$email])->n > 0;
+    }
+
+    public function activate(Actor $actor): void
+    {
+        $sql = "UPDATE account.actor 
+                   SET verification_token = NULL
+                 WHERE address = ?";
+        $this->query($sql, [
+            $actor->address
+        ]);
     }
 
     private function canonicalJson(stdClass $new): string

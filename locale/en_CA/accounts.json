@@ -11,12 +11,13 @@
       "email_required": "The <b>email</b> must not be empty.",
       "email_invalid": "The <b>email</b> is invalid.",
       "agree_required": "You must agree to the <b>terms and policy</b> before registering.",
-      "not_verified": "Check {email} for a verification email to verify ownership of this wallet and continue."
+      "not_verified": "Check {email} for a verification email to verify ownership of this wallet and continue.",
+      "activation_invalid": "The activation code is invalid."
     },
 
     "success": {
       "created": "Your account associated with the wallet <b>{wallet}</b> has been successfully created 🎉. You must confirm your email address ({email}) before you can access the application. Please check your email for the confirmation link.",
-      "confirmed": "Your submitter account <b>{wallet}</b> has been confirmed for the email address {email} 🎉. You may now submit new evidences or cases."
+      "activation": "Your account associated with the wallet <b>{wallet}</b> has been successfully activated 🎉. You may now proceed with the sign-in process."
     },
 
     "emails": {
