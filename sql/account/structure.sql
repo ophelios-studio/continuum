@@ -16,20 +16,3 @@ CREATE TABLE IF NOT EXISTS account.actor
 
 CREATE INDEX IF NOT EXISTS actor_level_idx ON account.actor(level);
 CREATE INDEX IF NOT EXISTS actor_org_idx ON account.actor(organization_id);
-
-CREATE TABLE IF NOT EXISTS account.actor_history
-(
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Prevent id override
-    address TEXT NOT NULL,
-    profile_json TEXT NOT NULL, -- the exact canonical JSON you hashed
-    profile_hash TEXT NOT NULL,
-    saved_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS sph_addr_idx ON account.actor_history(address);
-
-
-
-
-
-
-
