@@ -8,6 +8,14 @@ use Zephyrus\Network\Router\Authorize;
 #[Authorize("authenticated")]
 abstract class AppController extends Controller
 {
+    public function before(): ?Response
+    {
+        if (is_null(Session::get('actor'))) {
+            return $this->redirect("/signup");
+        }
+        return parent::before();
+    }
+
     public function render(string $page, array $args = []): Response
     {
         $args = array_merge($args, [

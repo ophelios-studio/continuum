@@ -1,0 +1,43 @@
+{layout ../layouts/bootstrap.latte}
+
+{varType string $wallet}
+{varType ?string $ens_name}
+{varType ?string $ens_avatar}
+
+{block content}
+    <form class="card card-md" action="/signup" method="post" autocomplete="off" novalidate>
+        <div class="card-body">
+            <h2 class="h3 text-center mb-3">Complete your account</h2>
+            <div class="text-center mb-4">
+                {include "zf-avatar-image", '/assets/images/avatars/' . $ens_avatar, [
+                    size: 'xl',
+                    brand: '/assets/images/logos/eth.svg',
+                    brand-size: "0.5rem"
+                ]}
+                <div class="mt-2">{$ens_name}</div>
+                <div>{format('wallet', $wallet)}</div>
+            </div>
+            {include "zf-flash"}
+            {include "zf-field-email", "Email address", "email", [
+                required: true,
+                placeholder: "E.g., bruce@wayne.com",
+                hint: "You will have to verify your email."
+            ]}
+            {include "zf-field-text", "Firstname", "firstname", [
+                required: true,
+                placeholder: "E.g., Bruce"
+            ]}
+            {include "zf-field-text", "Lastname", "lastname", [
+                required: true,
+                placeholder: "E.g., Wayne"
+            ]}
+            {include "zf-field-checkbox", 'Agree the <a href="/terms" target="_terms" tabindex="-1">terms and policy</a>.', "agree", [
+                required: true
+            ]}
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary w-100">Create new account</button>
+            </div>
+        </div>
+    </form>
+    <div class="text-center text-secondary mt-3">Not ready yet? <a href="/logout" tabindex="-1">Cancel</a></div>
+{/block}
