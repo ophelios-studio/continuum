@@ -15,5 +15,5 @@ Formatter::register('day_full', function ($dateTime) {
 });
 
 Formatter::register('wallet', function (string $wallet) {
-    return substr($wallet, 0, 4) . "..." . substr($wallet, -4);
+    return substr($wallet, 0, 6) . "..." . substr($wallet, -4);
 });
