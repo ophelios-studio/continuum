@@ -17,6 +17,10 @@ contract SubmitterRegistry is AccessControl {
 
     mapping(address => Submitter) public submitters;
 
+    event SubmitterRegistered(address indexed wallet, bytes32 profileHash, string jurisdiction);
+    event SubmitterVerified(address indexed wallet, Roles.RoleLevel level, uint64 verifiedUntil, uint256 orgId);
+    event SubmitterRevoked(address indexed wallet);
+
     constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(Roles.ADMIN, admin);
@@ -31,6 +35,7 @@ contract SubmitterRegistry is AccessControl {
         s.jurisdiction = jurisdiction;
         s.verifiedUntil = 0;
         s.orgId = 0;
+        emit SubmitterRegistered(msg.sender, profileHash, jurisdiction);
     }
 
     function verifySubmitter(
@@ -45,11 +50,13 @@ contract SubmitterRegistry is AccessControl {
         s.level = level;
         s.verifiedUntil = verifiedUntil;
         s.orgId = orgId;
+        emit SubmitterVerified(wallet, level, verifiedUntil, orgId);
     }
 
     function revokeSubmitter(address wallet) external onlyRole(Roles.VALIDATOR) {
         Submitter storage s = submitters[wallet];
         s.level = Roles.RoleLevel.REVOKED;
+        emit SubmitterRevoked(wallet);
     }
 
     function roleLevel(address wallet) external view returns (Roles.RoleLevel) {
