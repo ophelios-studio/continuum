@@ -2,6 +2,7 @@
 
 use Controllers\Controller;
 use Ens\EnsService;
+use Models\Account\Services\ActorService;
 use Models\Application\SiweVerifier;
 use Models\Application\AvatarDownloader;
 use Throwable;
@@ -59,6 +60,8 @@ class AuthController extends Controller
                     Session::set('ens_avatar', $resultAvatar);
                 }
             }
+            $account = new ActorService()->findByAddress($result['address']);
+            Session::set('actor', $account?->getRawData() ?? null);
             return $this->json(['address' => $result['address']]);
         } catch (Throwable $e) {
             return $this->jsonError(401, $e->getMessage());
