@@ -31,7 +31,8 @@ abstract class AppController extends Controller
         $args = array_merge($args, [
             'wallet' => Session::get('wallet'),
             'ens_avatar' => Session::get('ens_avatar'),
-            'ens_name' => Session::get('ens_name')
+            'ens_name' => Session::get('ens_name'),
+            'actor' => Actor::build(Session::get('actor'))
         ]);
         return parent::render($page, $args);
     }
