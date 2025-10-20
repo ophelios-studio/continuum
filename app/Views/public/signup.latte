@@ -20,8 +20,7 @@
             {include "zf-flash"}
             {include "zf-field-email", "Email address", "email", [
                 required: true,
-                placeholder: "E.g., bruce@wayne.com",
-                hint: "You will have to verify your email."
+                placeholder: "E.g., bruce@wayne.com"
             ]}
             {include "zf-field-text", "Firstname", "firstname", [
                 required: true,
@@ -30,6 +29,14 @@
             {include "zf-field-text", "Lastname", "lastname", [
                 required: true,
                 placeholder: "E.g., Wayne"
+            ]}
+            {include "zf-field-text", "Jurisdiction", "jurisdiction", [
+                required: true,
+                placeholder: "E.g., QC-CA"
+            ]}
+            {include "zf-field-text", "Primary role", "primary_role", [
+                required: true,
+                placeholder: "E.g., Tech Lab"
             ]}
             {include "zf-field-checkbox", 'Agree the <a href="/terms" target="_terms" tabindex="-1">terms and policy</a>.', "agree", [
                 required: true
