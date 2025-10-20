@@ -22,8 +22,8 @@ class ActorValidator
             Rule::required(localize("accounts.errors.lastname_required")),
             Rule::name(localize("accounts.errors.lastname_invalid"))
         ]);
-        $form->field('juridiction', [
-            Rule::required(localize("accounts.errors.juridiction_required")),
+        $form->field('jurisdiction', [
+            Rule::required(localize("accounts.errors.jurisdiction_required")),
         ]);
         $form->field('primary_role', [
             Rule::required(localize("accounts.errors.primary_role_required")),
