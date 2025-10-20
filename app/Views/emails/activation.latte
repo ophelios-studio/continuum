@@ -1,0 +1,18 @@
+{layout ../pulsar/emails/layout.latte}
+
+{varType Models\Account\Entities\Actor $actor}
+{varType string $url}
+{varType string $contact_email}
+
+{block content}
+    <div class="text">
+        <h2>{localize("accounts.emails.activation.title")|noescape}</h2>
+        <p>{localize("accounts.emails.activation.description", ['fullname' => $actor->getFullName()])|noescape}</p>
+        <br />
+        <div style="text-align: center; font-size: 16px;">
+            <a href={$url}>{localize("accounts.emails.activation.labels.activate")}</a>
+        </div>
+        <br />
+        <p>{localize("accounts.emails.activation.information", ['activation_url' => $url, 'support_email' => $contact_email])|noescape}</p>
+    </div>
+{/block}
