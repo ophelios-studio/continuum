@@ -2,9 +2,10 @@
 pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "./Roles.sol";
 
-contract SubmitterRegistry is AccessControl {
+contract SubmitterRegistry is AccessControl, Pausable {
     using Roles for *;
 
     struct Submitter {
@@ -27,7 +28,15 @@ contract SubmitterRegistry is AccessControl {
         _grantRole(Roles.VALIDATOR, admin);
     }
 
-    function registerSubmitter(bytes32 profileHash, string calldata jurisdiction) external {
+    function pause() external onlyRole(Roles.ADMIN) {
+        _pause();
+    }
+
+    function unpause() external onlyRole(Roles.ADMIN) {
+        _unpause();
+    }
+
+    function registerSubmitter(bytes32 profileHash, string calldata jurisdiction) external whenNotPaused {
         Submitter storage s = submitters[msg.sender];
         require(s.level == Roles.RoleLevel.NONE || s.level == Roles.RoleLevel.REVOKED, "Already registered");
         s.level = Roles.RoleLevel.DECLARED;
@@ -43,7 +52,7 @@ contract SubmitterRegistry is AccessControl {
         Roles.RoleLevel level,
         uint64 verifiedUntil,
         uint256 orgId
-    ) external onlyRole(Roles.VALIDATOR) {
+    ) external whenNotPaused onlyRole(Roles.VALIDATOR) {
         require(level == Roles.RoleLevel.VERIFIED_L1 || level == Roles.RoleLevel.VERIFIED_L2, "Invalid level");
         Submitter storage s = submitters[wallet];
         require(s.level != Roles.RoleLevel.NONE, "Not registered");
@@ -53,7 +62,7 @@ contract SubmitterRegistry is AccessControl {
         emit SubmitterVerified(wallet, level, verifiedUntil, orgId);
     }
 
-    function revokeSubmitter(address wallet) external onlyRole(Roles.VALIDATOR) {
+    function revokeSubmitter(address wallet) external whenNotPaused onlyRole(Roles.VALIDATOR) {
         Submitter storage s = submitters[wallet];
         s.level = Roles.RoleLevel.REVOKED;
         emit SubmitterRevoked(wallet);
