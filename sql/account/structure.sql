@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS account.actor
     email TEXT NOT NULL,
     primary_role TEXT NOT NULL, -- e.g. LAWYER / OFFICER / LAB_TECH / CLERK / OTHER
     jurisdiction TEXT NOT NULL, -- e.g. "CA-QC"
-    profile_hash TEXT NOT NULL, -- keccak256 of canonical profile JSON
+    profile_json TEXT NOT NULL,
+    profile_hash TEXT NOT NULL, -- keccak256 of profile_json
     organization_id INTEGER NULL DEFAULT NULL,
     verification_token TEXT NULL DEFAULT NULL, -- Email verification token, NULL means verified
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

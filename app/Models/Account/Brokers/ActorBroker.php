@@ -1,5 +1,6 @@
 <?php namespace Models\Account\Brokers;
 
+use kornrunner\Keccak;
 use Models\Account\Entities\Actor;
 use Models\Core\Broker;
 use stdClass;
@@ -28,8 +29,10 @@ class ActorBroker extends Broker
     public function insert(stdClass $new, string $level = 'DECLARED'): string
     {
         $verificationToken = Cryptography::randomString(64);
-        $sql = "INSERT INTO account.actor(address, firstname, lastname, email, primary_role, jurisdiction, profile_hash, organization_id, verification_token, level) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $new->profile_json = $this->canonicalJson($new);
+        $new->profile_hash = '0x' . Keccak::hash($new->profile_json, 256);
+        $sql = "INSERT INTO account.actor(address, firstname, lastname, email, primary_role, jurisdiction, profile_json, profile_hash, organization_id, verification_token, level) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $this->query($sql, [
             $new->address,
             $new->firstname,
@@ -37,7 +40,8 @@ class ActorBroker extends Broker
             $new->email,
             $new->primary_role,
             $new->jurisdiction,
-            $this->canonicalJson($new),
+            $new->profile_json,
+            $new->profile_hash,
             null,
             $verificationToken,
             $level
