@@ -9,7 +9,7 @@ class Actor extends Entity
     public string $firstname;
     public string $lastname;
     public string $email;
-    private string $primary_role;
+    public string $primary_role;
     public string $jurisdiction;
     public string $profile_hash;
     public ?int $organization_id;
