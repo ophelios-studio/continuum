@@ -6,6 +6,8 @@ use Models\Account\Services\ActorService;
 use Models\Application\SiweVerifier;
 use Models\Application\AvatarDownloader;
 use Throwable;
+use Usarise\Identicon\Identicon;
+use Usarise\Identicon\Image\Svg\Canvas as SvgCanvas;
 use Zephyrus\Core\Configuration;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
@@ -52,14 +54,31 @@ class AuthController extends Controller
             $rpcUrl = Configuration::read('services')['infura']['eth_url'];
             $ens = new EnsService($rpcUrl);
             $name = $ens->resolveEnsName($result['address']);
+            $basedir = ROOT_DIR . '/public/assets/images/avatars';
+            $resultAvatar = $this->findFileByBasename($basedir, md5($result['address']));
+            $expired = $resultAvatar && filemtime($basedir . "/" . $resultAvatar) < time() - 86400; // 24h
             if ($name) {
                 Session::set('ens_name', $name);
-                $avatar = $ens->resolveAvatar($name);
-                if ($avatar) {
-                    $resultAvatar = new AvatarDownloader($avatar)->download(md5($avatar));
-                    Session::set('ens_avatar', $resultAvatar);
+                if (!$resultAvatar || $expired) {
+                    $avatar = $ens->resolveAvatar($name);
+                    if ($avatar) {
+                        $resultAvatar = new AvatarDownloader($avatar)->download(md5($result['address']));
+                    } else {
+                        $identicon = new Identicon(new SvgCanvas(), 420);
+                        $response = $identicon->generate($result['address']);
+                        $resultAvatar = md5($result['address']) . "." . $response->format;
+                        $response->save($basedir . '/' . $resultAvatar);
+                    }
+                }
+            } else {
+                if (!$resultAvatar || $expired) {
+                    $identicon = new Identicon(new SvgCanvas(), 420);
+                    $response = $identicon->generate($result['address']);
+                    $resultAvatar = md5($result['address']) . "." . $response->format;
+                    $response->save($basedir . '/' . $resultAvatar);
                 }
             }
+            Session::set('ens_avatar', $resultAvatar);
             $account = new ActorService()->findByAddress($result['address']);
             Session::set('actor', $account?->getRawData() ?? null);
             return $this->json(['address' => $result['address']]);
@@ -79,5 +98,44 @@ class AuthController extends Controller
     {
         $bytes = Cryptography::randomBytes($length);
         return rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');
+    }
+
+    /**
+     * Find a file by base name regardless of extension.
+     *
+     * @param string $dir       Directory to search
+     * @param string $basename  Name without extension (e.g., "avatar" or "user.profile")
+     * @return string|null Filename with extension (e.g., "avatar.png") or null if not found
+     */
+    private function findFileByBasename(string $dir, string $basename): ?string
+    {
+        if (!is_dir($dir)) {
+            return null;
+        }
+
+        $quoted = preg_quote($basename, '/');
+        $pattern = '/^' . $quoted . '\.[^.]+$/i'; // "<basename>.<ext>" where ext has no dots
+
+        $dh = opendir($dir);
+        if ($dh === false) {
+            return null;
+        }
+
+        $result = null;
+        while (($entry = readdir($dh)) !== false) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $full = $dir . DIRECTORY_SEPARATOR . $entry;
+            if (!is_file($full)) {
+                continue;
+            }
+            if (preg_match($pattern, $entry) === 1) {
+                $result = $entry; // return filename with extension only
+                break;
+            }
+        }
+        closedir($dh);
+        return $result;
     }
 }
