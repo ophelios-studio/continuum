@@ -14,9 +14,9 @@ export default {
         }
     },
     networks: {
-        hardhat: {},
         sepolia: {
             url: process.env.SEPOLIA_RPC || "https://rpc.sepolia.org",
+            type: "http",
             chainType: "l1",
             accounts: PK,
             chainId: 11155111
