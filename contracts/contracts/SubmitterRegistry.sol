@@ -3,10 +3,9 @@ pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
-import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "./Roles.sol";
 
-contract SubmitterRegistry is ERC2771Context, AccessControl, Pausable {
+contract SubmitterRegistry is AccessControl, Pausable {
     using Roles for *;
 
     struct Submitter {
@@ -23,8 +22,7 @@ contract SubmitterRegistry is ERC2771Context, AccessControl, Pausable {
     event SubmitterVerified(address indexed wallet, Roles.RoleLevel level, uint64 verifiedUntil, uint256 orgId);
     event SubmitterRevoked(address indexed wallet);
 
-    constructor(address admin, address trustedForwarder)
-        ERC2771Context(trustedForwarder) {
+    constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(Roles.ADMIN, admin);
         _grantRole(Roles.VALIDATOR, admin);
@@ -39,15 +37,14 @@ contract SubmitterRegistry is ERC2771Context, AccessControl, Pausable {
     }
 
     function registerSubmitter(bytes32 profileHash, string calldata jurisdiction) external whenNotPaused {
-        address sender = _msgSender();
-        Submitter storage s = submitters[sender];
+        Submitter storage s = submitters[msg.sender];
         require(s.level == Roles.RoleLevel.NONE || s.level == Roles.RoleLevel.REVOKED, "Already registered");
         s.level = Roles.RoleLevel.DECLARED;
         s.profileHash = profileHash;
         s.jurisdiction = jurisdiction;
         s.verifiedUntil = 0;
         s.orgId = 0;
-        emit SubmitterRegistered(sender, profileHash, jurisdiction);
+        emit SubmitterRegistered(msg.sender, profileHash, jurisdiction);
     }
 
     function verifySubmitter(
@@ -73,17 +70,5 @@ contract SubmitterRegistry is ERC2771Context, AccessControl, Pausable {
 
     function roleLevel(address wallet) external view returns (Roles.RoleLevel) {
         return submitters[wallet].level;
-    }
-
-    function _msgSender() internal view override(Context, ERC2771Context) returns (address) {
-        return ERC2771Context._msgSender();
-    }
-
-    function _msgData() internal view override(Context, ERC2771Context) returns (bytes calldata) {
-        return ERC2771Context._msgData();
-    }
-
-    function _contextSuffixLength() internal view override(Context, ERC2771Context) returns (uint256) {
-        return ERC2771Context._contextSuffixLength();
     }
 }
