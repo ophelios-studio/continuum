@@ -37,11 +37,16 @@ class SignupController extends Controller
             || is_null(Session::get('wallet'))) {
             return $this->redirect("/login");
         }
+        $actor = Actor::build(Session::get('actor'));
+        if ($actor->anchor_tx) {
+            return $this->redirect("/");
+        }
         return $this->render("public/anchor", [
             'wallet' => Session::get('wallet'),
             'ens_avatar' => Session::get('ens_avatar'),
             'ens_name' => Session::get('ens_name'),
-            'actor' => Actor::build(Session::get('actor'))
+            'actor' => $actor,
+            'submitter_address' => '0xdBfef357AaF020B9a1e8e4DB0E2b132875602163'
         ]);
     }
 
