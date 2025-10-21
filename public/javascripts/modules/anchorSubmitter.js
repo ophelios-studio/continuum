@@ -101,3 +101,34 @@ export async function anchorProfile({submitterAddress, profileHash, jurisdiction
     return { txHash };
 }
 
+export function initAnchorButton(btn, { chainId = 11155111, onDone } = {}) {
+    const statusEl = document.getElementById("anchorStatus");
+    const setStatus = (m) => { if (statusEl) statusEl.textContent = m || ""; };
+
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+        try {
+            btn.disabled = true;
+            const submitterAddress = btn.dataset.submitContract;
+            const profileHash      = btn.dataset.profileHash;
+            const jurisdiction     = btn.dataset.jurisdiction;
+
+            const { txHash } = await anchorProfile({
+                submitterAddress,
+                profileHash,
+                jurisdiction,
+                chainId,
+                onStatus: setStatus,
+            });
+
+            setStatus(`Anchored Tx: ${txHash}`);
+            if (typeof onDone === "function") {
+                onDone(txHash);
+            }
+        } catch (err) {
+            console.error(err);
+            setStatus(err?.message || "Failed to anchor.");
+            btn.disabled = false;
+        }
+    });
+}
