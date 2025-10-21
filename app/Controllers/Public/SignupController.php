@@ -1,6 +1,7 @@
 <?php namespace Controllers\Public;
 
 use Controllers\Controller;
+use Models\Account\Entities\Actor;
 use Models\Account\Services\ActorService;
 use Models\Core\Application;
 use Zephyrus\Application\Flash;
@@ -26,6 +27,21 @@ class SignupController extends Controller
             'wallet' => Session::get('wallet'),
             'ens_avatar' => Session::get('ens_avatar'),
             'ens_name' => Session::get('ens_name')
+        ]);
+    }
+
+    #[Get("/anchor")]
+    public function anchorForm(): Response
+    {
+        if (is_null(Session::get('actor'))
+            || is_null(Session::get('wallet'))) {
+            return $this->redirect("/login");
+        }
+        return $this->render("public/anchor", [
+            'wallet' => Session::get('wallet'),
+            'ens_avatar' => Session::get('ens_avatar'),
+            'ens_name' => Session::get('ens_name'),
+            'actor' => Actor::build(Session::get('actor'))
         ]);
     }
 
