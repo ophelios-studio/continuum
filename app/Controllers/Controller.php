@@ -97,7 +97,7 @@ abstract class Controller extends BaseController
         $csp->setScriptSources(["'self'", 'https://cdn.jsdelivr.net']);
         $csp->setChildSources(["'self'"]);
         $csp->setWorkerSources(["blob:"]);
-        $csp->setConnectSources(["'self'", 'https://cdn.jsdelivr.net']);
+        $csp->setConnectSources(["'self'", 'https://cdn.jsdelivr.net', 'https://esm.sh']);
         $csp->setImageSources(["'self'", 'blob:', 'data:']);
         $csp->setBaseUri([$this->request->getUrl()->getBaseUrl()]);
         $secureHeader->setContentSecurityPolicy($csp);
