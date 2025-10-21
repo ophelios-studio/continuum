@@ -1,0 +1,50 @@
+{layout ../../layouts/main.latte}
+
+{import components/navigation.latte}
+
+{block content}
+    <!-- BEGIN PAGE HEADER -->
+    <div class="page-header d-print-none" aria-label="Page header">
+        <div class="container-xl">
+            <div class="row g-2 align-items-center">
+                <div class="col">
+                    <h2 class="page-title">Account Settings</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END PAGE HEADER -->
+    <!-- BEGIN PAGE BODY -->
+    <div class="page-body">
+        <div class="container-xl">
+            <div class="card">
+                <div class="row g-0">
+                    {include "profile-navigation", "/me"}
+                    <div class="col-12 col-md-9 d-flex flex-column">
+                        <div class="card-body">
+                            <h3 class="card-title">Profile Details</h3>
+                            {include "zf-flash"}
+                            <form action="/me" method="post">
+                                <h3 class="card-title mt-4">Business Profile</h3>
+                                <div class="row g-3">
+                                    <div class="col-md">
+                                        <div class="form-label">Business Name</div>
+                                        <input type="text" class="form-control" value="Tabler" />
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-label">Business ID</div>
+                                        <input type="text" class="form-control" value="560afc32" />
+                                    </div>
+                                    <div class="col-md">
+                                        <div class="form-label">Location</div>
+                                        <input type="text" class="form-control" value="Peimei, China" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{/block}

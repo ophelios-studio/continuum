@@ -8,4 +8,7 @@ library Roles {
     bytes32 public constant UPGRADER = keccak256("UPGRADER");
 
     enum RoleLevel { NONE, DECLARED, VERIFIED_L1, VERIFIED_L2, REVOKED }
+    enum EvidenceKind { DIGITAL, PHYSICAL }
+    enum TrustLevel { DECLARED, L1, L2, REVOKED }
+    enum Policy { NONE, AUTO_EXPIRE, AUTO_REASSIGN }
 }

@@ -4,6 +4,7 @@
 {varType Models\Account\Entities\Actor $actor}
 {varType ?string $ens_name}
 {varType ?string $ens_avatar}
+{varType string $submitter_address}
 
 {block content}
     <div class="card card-md">
@@ -19,8 +20,9 @@
                 <div>{format('wallet', $wallet)}</div>
             </div>
             <p class="muted">
-                To complete your first login, we’ll anchor your profile on-chain using a <strong>gasless (free)</strong> meta-transaction. Only a
-                <strong>hash of your profile</strong> and your <strong>jurisdiction</strong> are recorded — <em>no personal details</em> go on-chain.
+                To complete your first login, we'll anchor your profile on-chain. Your wallet will send a transaction
+                (<strong>you pay gas</strong>). Only a <strong>hash of your profile</strong> and your
+                <strong>jurisdiction</strong> are recorded — <em>no personal details</em> go on-chain.
             </p>
 
             <div><b>Wallet</b></div>
@@ -37,13 +39,28 @@
                 <button
                         id="anchorConfirmBtn"
                         class="btn btn-primary w-100"
-                        data-address="{$wallet}"
-                        data-jurisdiction="{$actor->jurisdiction}"
-                        data-profile-hash="{$actor->profile_hash}">
+                        data-submit-contract="{$submitter_address}"
+                        data-profile-hash="{$actor->profile_hash}"
+                        data-jurisdiction="{$actor->jurisdiction}">
                     Confirm & Sign
                 </button>
             </div>
         </div>
     </div>
     <div class="text-center text-secondary mt-3">Not ready yet? <a href="/logout" tabindex="-1">Cancel</a></div>
+
+    <script type="module" n:syntax="off" nonce="{nonce()}">
+        import { initAnchorButton } from '/javascripts/modules/anchorSubmitter.js';
+
+        const btn = document.getElementById('anchorConfirmBtn');
+        initAnchorButton(btn, {
+            chainId: 11155111,
+            onDone(txHash) {
+                console.log('Anchor transaction submitted: ' + txHash);
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 5000);
+            }
+        });
+    </script>
 {/block}
