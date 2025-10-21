@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS account.actor
     jurisdiction TEXT NOT NULL, -- e.g. "CA-QC"
     profile_json TEXT NOT NULL,
     profile_hash TEXT NOT NULL, -- keccak256 of profile_json
+    anchor_tx TEXT NULL DEFAULT NULL, -- Anchor transaction hash, NULL means not anchored
     organization_id INTEGER NULL DEFAULT NULL,
     verification_token TEXT NULL DEFAULT NULL, -- Email verification token, NULL means verified
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -14,6 +14,7 @@ class Actor extends Entity
     public string $profile_hash;
     public ?int $organization_id;
     public ?string $verification_token;
+    public ?string $anchor_tx;
     public string $created_at;
     public string $updated_at;
 
