@@ -1,3 +1,10 @@
+import {
+    createWalletClient,
+    custom,
+    encodeFunctionData,
+    parseAbi,
+} from "https://esm.sh/viem@2.38.3";
+
 async function ensureChain(provider, targetChainId) {
     const current = await provider.request({ method: "eth_chainId" });
     const currentDec = parseInt(current, 16);
