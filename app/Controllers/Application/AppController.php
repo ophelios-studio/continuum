@@ -23,6 +23,9 @@ abstract class AppController extends Controller
             Flash::error(localize("accounts.errors.not_verified", ['email' => MaskFormat::email($actor->email)]));
             return $this->redirect("/login");
         }
+        if (!$actor->anchor_tx) {
+            return $this->redirect("/anchor");
+        }
         return parent::before();
     }
 
