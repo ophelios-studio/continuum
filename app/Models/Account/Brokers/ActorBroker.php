@@ -76,6 +76,12 @@ class ActorBroker extends Broker
         ]);
     }
 
+    public function anchor(string $address, string $anchorTx): void
+    {
+        $sql = "UPDATE account.actor SET anchor_tx = ? WHERE address = ?";
+        $this->query($sql, [$anchorTx, $address]);
+    }
+
     private function canonicalJson(stdClass $new): string
     {
         $ordered = [

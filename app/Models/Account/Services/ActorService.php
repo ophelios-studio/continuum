@@ -30,6 +30,11 @@ readonly class ActorService
         $this->broker->activate($actor);
     }
 
+    public function anchor(string $address, string $anchorTx): void
+    {
+        $this->broker->anchor($address, $anchorTx);
+    }
+
     public function insert(Form $form): Actor
     {
         ActorValidator::assertInsert($form);
