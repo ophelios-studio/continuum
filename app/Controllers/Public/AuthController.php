@@ -8,6 +8,7 @@ use Models\Application\AvatarDownloader;
 use Throwable;
 use Usarise\Identicon\Identicon;
 use Usarise\Identicon\Image\Svg\Canvas as SvgCanvas;
+use Zephyrus\Application\Flash;
 use Zephyrus\Core\Configuration;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
@@ -80,11 +81,34 @@ class AuthController extends Controller
             }
             Session::set('ens_avatar', $resultAvatar);
             $account = new ActorService()->findByAddress($result['address']);
-            Session::set('actor', $account?->getRawData() ?? null);
+            Session::set('actor', null);
+            if ($account) {
+                Session::set('actor', $account->getRawData());
+            }
             return $this->json(['address' => $result['address']]);
         } catch (Throwable $e) {
             return $this->jsonError(401, $e->getMessage());
         }
+    }
+
+    #[Post("/siwe/anchor")]
+    public function anchor(): Response
+    {
+        $wallet = Session::get('wallet');
+        if (!$wallet) {
+            return $this->jsonError(401, 'SIWE required');
+        }
+
+        $tx = $this->request->getParameter('txHash');
+        if (!$tx || !preg_match('/^0x[0-9a-fA-F]{64}$/', $tx)) {
+            return $this->jsonError(400, 'Invalid tx hash');
+        }
+
+        $service = new ActorService();
+        $service->anchor($wallet, $tx);
+        Session::set("actor", $service->findByAddress($wallet)->getRawData());
+        Flash::success("Account successfully anchored 🎉! Transaction: $tx.");
+        return $this->json(['ok' => true]);
     }
 
     /**
