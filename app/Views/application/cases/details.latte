@@ -3,6 +3,7 @@
 {varType array $case}
 {varType array $participants}
 {varType array $events}
+{varType array $evidences}
 
 {block content}
 <div class="page-header d-print-none">
@@ -256,17 +257,122 @@
             </div>
           </div>
 
-          <div class="tab-pane" id="tab-evidence">
-            <div class="empty">
-              <div class="empty-img">
-                {include "zf-undraw", "collecting"}
+          {* Evidence tab *}
+            <div class="tab-pane" id="tab-evidence">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="text-secondary">
+                  {if count($evidences) > 0}
+                    {count($evidences)} item{if count($evidences) !== 1}s{/if}
+                  {else}
+                    No evidence yet
+                  {/if}
+                </div>
+                <div>
+                  <a href="/cases/{$case->id}/evidence/new" class="btn btn-primary">
+                    Add evidence
+                  </a>
+                </div>
               </div>
-              <p class="empty-title">No evidence yet</p>
-              <div class="empty-action">
-                <a href="/cases/{$case->id}/evidences/new" class="btn btn-primary" aria-disabled="true">Add evidence</a>
-              </div>
+
+              {if count($evidences) === 0}
+                <div class="empty">
+                  <div class="empty-img">
+                    {include "zf-undraw", "collecting"}
+                  </div>
+                  <p class="empty-title">No evidence yet</p>
+                  <p class="empty-subtitle text-secondary">
+                    Create your first evidence record for this case. You can attach files, anchor on-chain,
+                    and manage custody transfers.
+                  </p>
+                  <div class="empty-action">
+                    <a href="/cases/{$case->id}/evidence/new" class="btn btn-primary">Add evidence</a>
+                  </div>
+                </div>
+              {else}
+                <div class="card card-borderless">
+                  <div class="table-responsive">
+                    <table class="table table-vcenter card-table">
+                      <thead>
+                        <tr>
+                          <th class="w-1"></th>
+                          <th>Title</th>
+                          <th>Kind</th>
+                          <th>Status</th>
+                          <th>Custodian</th>
+                          <th>Anchored</th>
+                          <th class="w-1"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      {foreach $evidences as $ev}
+                        {php
+                          $statusBadge = match($ev->status) {
+                            'ANCHORED' => 'badge bg-green-lt',
+                            'READY'    => 'badge bg-blue-lt',
+                            'DRAFT'    => 'badge bg-yellow-lt',
+                            default    => 'badge bg-secondary',
+                          };
+                          $kindBadge = 'badge bg-azure-lt';
+                          $anchored  = ($ev->anchor_tx !== null && $ev->anchor_tx !== '');
+                          $custodianShort = format('wallet', $ev->current_custodian);
+                        }
+                        <tr>
+                          <td>
+                            <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
+                              {=substr($ev->title ?? 'E', 0, 1)}
+                            </span>
+                          </td>
+                          <td>
+                            <div class="fw-bold">{$ev->title}</div>
+                            <div class="text-secondary small">
+                              {if $ev->physical_tag}<span class="me-2">Tag: <code>{$ev->physical_tag}</code></span>{/if}
+                              {if $ev->serial}<span class="me-2">ID: <code>{$ev->serial}</code></span>{/if}
+                              <span class="me-2">Jurisdiction: <code>{$ev->jurisdiction}</code></span>
+                              {if $ev->evidence_id_hex}
+                                <span class="me-2">EvidenceId: <code class="text-nowrap">{$ev->evidence_id_hex|truncate:18}</code></span>
+                              {/if}
+                            </div>
+                          </td>
+                          <td>
+                            <span class="{$kindBadge}">{$ev->kind}</span>
+                          </td>
+                          <td>
+                            <span class="{$statusBadge}">{$ev->status}</span>
+                          </td>
+                          <td>
+                            <code>{$custodianShort}</code>
+                          </td>
+                          <td>
+                            {if $anchored}
+                              <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-green-lt">Yes</span>
+                                <a class="text-secondary small"
+                                   href="https://sepolia.etherscan.io/tx/{$ev->anchor_tx}"
+                                   target="_blank" rel="noreferrer">
+                                  {=substr($ev->anchor_tx,0,10)}...{=substr($ev->anchor_tx,-6)}
+                                </a>
+                              </div>
+                            {else}
+                              <span class="badge bg-yellow-lt">No</span>
+                            {/if}
+                          </td>
+                          <td class="text-end">
+                            <div class="btn-list">
+                              {if $anchored}
+                                <a href="/evidence/{$ev->id}" class="btn btn-sm btn-outline">Open</a>
+                              {else}
+                                <a href="/evidence/{$ev->id}/anchor" class="btn btn-sm btn-primary">Anchor</a>
+                              {/if}
+                            </div>
+                          </td>
+                        </tr>
+                      {/foreach}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              {/if}
             </div>
-          </div>
 
           <!-- Activity -->
           <div class="tab-pane" id="tab-activity">
