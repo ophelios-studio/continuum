@@ -21,3 +21,18 @@ CREATE INDEX IF NOT EXISTS idx_cases_created_by ON legal.case (created_by);
 CREATE INDEX IF NOT EXISTS idx_cases_status ON legal.case (status);
 CREATE INDEX IF NOT EXISTS idx_cases_visibility ON legal.case (visibility);
 CREATE INDEX IF NOT EXISTS idx_cases_org ON legal.case (organization_id);
+
+CREATE TABLE IF NOT EXISTS legal.case_participant
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    case_id UUID NOT NULL REFERENCES legal.case(id) ON DELETE CASCADE,
+    address TEXT NOT NULL, -- wallet
+    role TEXT NOT NULL, -- OWNER / EDITOR / VIEWER
+    org_id INTEGER NULL,
+    invited_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    accepted_at TIMESTAMPTZ NULL,
+    CONSTRAINT case_participant_role_ck CHECK (role IN ('OWNER','EDITOR','VIEWER')),
+    CONSTRAINT case_participant_unique UNIQUE (case_id, address)
+);
+
+CREATE INDEX IF NOT EXISTS idx_case_participant_role ON legal.case_participant (role);
