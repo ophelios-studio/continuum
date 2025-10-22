@@ -28,7 +28,7 @@ class EvidenceValidator
         ]);
         $form->field('jurisdiction', [
             Rule::required(localize('evidences.errors.jurisdiction_required')),
-            Rule::regex('/^[A-Z]{2}-[A-Z0-9]{2,}$/', localize('evidences.errors.jurisdiction_invalid'))
+            Rule::regex('[A-Z]{2}-[A-Z0-9]{2,}', localize('evidences.errors.jurisdiction_invalid'))
         ]);
         $form->field('description', [
             Rule::maxLength(4000, localize('evidences.errors.description_too_long'))
