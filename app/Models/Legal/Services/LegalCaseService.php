@@ -4,6 +4,8 @@ use Models\Account\Entities\Actor;
 use Models\Legal\Brokers\CaseEventBroker;
 use Models\Legal\Brokers\CaseParticipantBroker;
 use Models\Legal\Brokers\LegalCaseBroker;
+use Models\Legal\Entities\CaseEvent;
+use Models\Legal\Entities\CaseParticipant;
 use Models\Legal\Entities\LegalCase;
 use Models\Legal\Validators\LegalCaseValidator;
 use Zephyrus\Application\Form;
@@ -16,7 +18,7 @@ final readonly class LegalCaseService
         private CaseEventBroker $events = new CaseEventBroker()
     ) {}
 
-    public function findById(string $id): LegalCase
+    public function findById(string $id): ?LegalCase
     {
         return LegalCase::build($this->cases->findById($id));
     }
@@ -44,6 +46,21 @@ final readonly class LegalCaseService
             'jurisdiction' => $case->jurisdiction,
         ]);
         return $case;
+    }
+
+    public function isParticipant(string $caseId, string $address): bool
+    {
+        return $this->participants->isParticipant($caseId, $address);
+    }
+
+    public function findAllParticipants(string $caseId): array
+    {
+        return CaseParticipant::buildArray($this->participants->list($caseId));
+    }
+
+    public function findAllEvents(string $caseId, int $limit = 100, int $offset = 0): array
+    {
+        return CaseEvent::buildArray($this->events->list($caseId, $limit, $offset));
     }
 
     public function addMember(int $caseId, string $owner, string $address, string $role, ?int $orgId = null): void

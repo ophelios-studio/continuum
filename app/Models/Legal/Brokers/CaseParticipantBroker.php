@@ -21,7 +21,7 @@ final class CaseParticipantBroker extends Broker
 
     public function list(string $caseId): array
     {
-        return $this->select('SELECT * FROM legal.case_participant WHERE case_id = :id ORDER BY id', [':id' => $caseId]);
+        return $this->select('SELECT * FROM legal.case_participant WHERE case_id = :id ORDER BY id', ['id' => $caseId]);
     }
 
     public function changeRole(string $caseId, string $address, string $role): void
