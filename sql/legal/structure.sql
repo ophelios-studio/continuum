@@ -36,3 +36,13 @@ CREATE TABLE IF NOT EXISTS legal.case_participant
 );
 
 CREATE INDEX IF NOT EXISTS idx_case_participant_role ON legal.case_participant (role);
+
+CREATE TABLE IF NOT EXISTS legal.case_label
+(
+    id BIGSERIAL PRIMARY KEY,
+    case_id UUID NOT NULL REFERENCES legal.case(id) ON DELETE CASCADE,
+    label TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_case_label_case ON legal.case_label (case_id);
+CREATE INDEX IF NOT EXISTS idx_case_label_tag ON legal.case_label (label);
