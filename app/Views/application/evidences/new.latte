@@ -2,6 +2,7 @@
 
 {varType Models\Legal\Entities\LegalCase $case}
 {varType ?string $default_jurisdiction}
+{varType array $kinds}
 
 {block content}
     <div class="page-header d-print-none">
@@ -34,97 +35,59 @@
             <div class="row row-cards">
                 <!-- Main form -->
                 <div class="col-12 col-lg-8">
-                    <form action="/cases/{$case->id}/evidence" method="post" enctype="multipart/form-data" class="card">
+                    <form action="/cases/{$case->id}/evidences" method="post" class="card">
                         <div class="card-header">
                             <h3 class="card-title">Evidence details</h3>
                         </div>
                         <div class="card-body">
+                            {include "zf-flash"}
                             <div class="row g-3">
-                                <!-- Title -->
                                 <div class="col-12">
-                                    <label class="form-label required">Title</label>
-                                    <input type="text" name="title" class="form-control"
-                                           placeholder="e.g. iPhone 14 Pro logical dump (Cellebrite)"
-                                           required>
-                                    <small class="form-hint">
-                                        Human-friendly label shown in lists and timelines.
-                                    </small>
-                                </div>
-
-                                <!-- Kind -->
-                                <div class="col-md-6">
-                                    <label class="form-label required">Kind</label>
-                                    <select name="kind" class="form-select" required>
-                                        <option value="DIGITAL_DUMP">Digital dump</option>
-                                        <option value="FILESET">Fileset / Document bundle</option>
-                                        <option value="PHOTO">Photo</option>
-                                        <option value="VIDEO">Video</option>
-                                        <option value="AUDIO">Audio</option>
-                                        <option value="PHYSICAL_ITEM">Physical item</option>
-                                        <option value="OTHER">Other</option>
-                                    </select>
-                                    <small class="form-hint">
-                                        Category for downstream processing and filters.
-                                    </small>
-                                </div>
-
-                                <!-- Jurisdiction -->
-                                <div class="col-md-6">
-                                    <label class="form-label required">Jurisdiction</label>
-                                    <input type="text" name="jurisdiction" class="form-control"
-                                           value="{$default_jurisdiction ?? $case->jurisdiction}" required>
-                                    <small class="form-hint">
-                                        Snapshot stored with the evidence anchor (e.g., <code>CA-QC</code>).
-                                    </small>
-                                </div>
-
-                                <!-- Description -->
-                                <div class="col-12">
-                                    <label class="form-label">Description / Notes</label>
-                                    <textarea name="description" class="form-control" rows="4"
-                                              placeholder="Acquisition method, device serial, context, chain linkage, etc. Avoid sensitive plaintext—files will be encrypted later with Lit."></textarea>
-                                </div>
-
-                                <!-- External link -->
-                                <div class="col-12">
-                                    <label class="form-label">External reference (optional)</label>
-                                    <input type="url" name="external_uri" class="form-control"
-                                           placeholder="https://… (ticket, cloud folder, lab ref)">
-                                    <small class="form-hint">
-                                        Not stored on-chain; useful for off-chain coordination.
-                                    </small>
-                                </div>
-
-                                <!-- Physical-specific fields (optional) -->
-                                <div class="col-md-6">
-                                    <label class="form-label">Physical label / tag (optional)</label>
-                                    <input type="text" name="physical_tag" class="form-control" placeholder="e.g. TAG-00142">
+                                    {include "zf-field-text", "Title", "title", [
+                                        placeholder: "e.g. iPhone 14 Pro logical dump (Cellebrite)",
+                                        required: true,
+                                        hint: "Human-friendly label shown in lists and timelines."
+                                    ]}
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Serial / identifier (optional)</label>
-                                    <input type="text" name="serial" class="form-control" placeholder="e.g. G6TZ… / IMEI / S/N">
+                                    {include "zf-field-select", "Kind", "kind", $kinds, [
+                                        required: true,
+                                        native: true
+                                    ]}
                                 </div>
-
-                                <!-- Files -->
+                                <div class="col-md-6">
+                                    {include "zf-field-text", "Jurisdiction", "jurisdiction", [
+                                        placeholder: "e.g. CA-QC",
+                                        required: true,
+                                        default: $default_jurisdiction ?? $case->jurisdiction
+                                    ]}
+                                </div>
                                 <div class="col-12">
-                                    <label class="form-label">Attach files (optional)</label>
-                                    <input class="form-control" type="file" name="files[]" multiple>
-                                    <small class="form-hint">
-                                        Files are uploaded now but <strong>encrypted at rest</strong> in a later step (Lit Protocol).
-                                        On-chain we only store hashes & pointers (no personal info).
-                                    </small>
+                                    {include "zf-field-textarea", "Description / Notes", "description", [
+                                        placeholder: "Acquisition method, device serial, context, chain linkage, etc. Avoid sensitive plaintext—files will be encrypted later with Lit.",
+                                        rows: "4"
+                                    ]}
                                 </div>
-
-                                <!-- Confirm -->
                                 <div class="col-12">
-                                    <label class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="affirm" value="1" required>
-                                        <span class="form-check-label">
-                    I confirm I have the right to submit this evidence for this case.
-                  </span>
-                                    </label>
+                                    {include "zf-field-text", "External reference", "external_uri", [
+                                        placeholder: "https://... (ticket, cloud folder, lab ref)",
+                                        hint: "Not stored on-chain; useful for off-chain coordination."
+                                    ]}
                                 </div>
 
+                                <div class="col-md-6">
+                                    {include "zf-field-text", "Physical label / tag", "physical_tag", [
+                                        placeholder: "e.g. TAG-00142"
+                                    ]}
+                                </div>
+                                <div class="col-md-6">
+                                    {include "zf-field-text", "Serial / identifier", "serial", [
+                                        placeholder: "e.g. G6TZ… / IMEI / S/N"
+                                    ]}
+                                </div>
+                                <div class="col-12">
+                                    {include "zf-field-checkbox", "I confirm I have the right to submit this evidence for this case.", "affirm"}
+                                </div>
                             </div>
                         </div>
                         <div class="card-footer d-flex align-items-center">
