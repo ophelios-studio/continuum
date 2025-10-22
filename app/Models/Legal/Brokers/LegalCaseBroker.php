@@ -7,10 +7,11 @@ final class LegalCaseBroker extends Broker
 {
     public function insert(stdClass $new): int
     {
+        $ref = $this->generateRef();
         $sql = "INSERT INTO legal.case(ref_code, title, description, jurisdiction, status, visibility, sensitivity, created_by, organization_id)
         VALUES(:ref_code, :title, :description, :jurisdiction, :status, :visibility, :sensitivity, :created_by, :organization_id) RETURNING id";
         $params = [
-            ':ref_code' => $new->ref_code,
+            ':ref_code' => $ref,
             ':title' => $new->title,
             ':description' => $new->description ?? '',
             ':jurisdiction' => $new->jurisdiction,
@@ -56,5 +57,12 @@ final class LegalCaseBroker extends Broker
 
         $sql = 'SELECT c.* FROM legal.case c WHERE ' . implode(' AND ', $where) . ' ORDER BY c.updated_at DESC';
         return $this->select($sql, $params);
+    }
+
+    private function generateRef(): string
+    {
+        $year = gmdate('Y');
+        $suffix = strtoupper(substr(hash('xxh3', uniqid('', true)), 0, 6));
+        return sprintf('C-%s-%s', $year, $suffix);
     }
 }
