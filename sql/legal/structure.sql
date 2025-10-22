@@ -50,7 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_case_label_tag ON legal.case_label (label);
 CREATE TABLE IF NOT EXISTS legal.case_event
 (
     id BIGSERIAL PRIMARY KEY,
-    case_id BIGINT NOT NULL REFERENCES legal.case(id) ON DELETE CASCADE,
+    case_id UUID NOT NULL REFERENCES legal.case(id) ON DELETE CASCADE,
     actor TEXT NOT NULL, -- wallet
     kind TEXT NOT NULL, -- e.g. CASE_CREATED / CASE_UPDATED / MEMBER_ADDED / STATUS_CHANGED / NOTE
     data JSONB NOT NULL DEFAULT '{}'::jsonb, -- additional payload
