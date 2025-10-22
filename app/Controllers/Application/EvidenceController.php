@@ -97,6 +97,65 @@ class EvidenceController extends AppController
         ]);
     }
 
+    #[Post('/{id}/anchor')]
+    public function anchor(string $caseId, string $id): Response
+    {
+        $actor = Actor::build(Session::get('actor'));
+        $cases = new LegalCaseService();
+        $case = $cases->findById($caseId);
+        if (!$case) {
+            Flash::error("The specified case was not found or you don't have access to it.");
+            return $this->redirect("/cases");
+        }
+
+        $service = new EvidenceService();
+        $evidence = $service->findById((int)$id);
+        if (!$evidence) {
+            return $this->jsonError(404, 'Evidence not found');
+        }
+
+        $cases = new LegalCaseService();
+        if (!$cases->isParticipant((string)$evidence->case_id, $actor->address)) {
+            return $this->jsonError(403, 'Permission denied');
+        }
+
+        $payload = $this->request->getParameters();
+        $txHash = strtolower(trim((string)($payload['txHash'] ?? '')));
+        $evidenceIdHex = strtolower(trim((string)($payload['evidenceIdHex'] ?? '')));
+        $contentHash = strtolower(trim((string)($payload['contentHashHex'] ?? '')));
+        $mediaUri = trim((string)($payload['mediaUri'] ?? ''));
+
+        if (!preg_match('/^0x[0-9a-f]{64}$/', $evidenceIdHex)) {
+            return $this->jsonError(400, 'Invalid evidenceId (bytes32 hex required)');
+        }
+        if (!preg_match('/^0x[0-9a-f]{64}$/', $contentHash)) {
+            return $this->jsonError(400, 'Invalid contentHash (bytes32 hex required)');
+        }
+        if (!preg_match('/^0x[0-9a-f]{64}$/', $txHash)) {
+            return $this->jsonError(400, 'Invalid txHash');
+        }
+
+        if (!empty($evidence->anchor_tx)) {
+            return $this->jsonError(409, 'Evidence is already anchored');
+        }
+
+        $service->persistAnchor(
+            $id,
+            $actor->address,
+            $evidenceIdHex,
+            $contentHash,
+            $mediaUri !== '' ? $mediaUri : null,
+            $txHash
+        );
+
+        Flash::success(localize('evidence.success.anchored', [
+            'title' => $evidence->title,
+            'tx' => $txHash
+        ]));
+
+        return $this->json(['ok' => true, 'tx' => $txHash]);
+    }
+
     #[Post("/")]
     public function create(string $caseId): Response
     {
