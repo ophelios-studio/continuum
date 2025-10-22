@@ -32,6 +32,8 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
     // evidenceId => state
     mapping(bytes32 => EvidenceState) private _state;
 
+    // EVENTS
+
     /// Emitted once per evidence anchor.
     event EvidenceAnchored(
         bytes32 indexed evidenceId,
@@ -43,6 +45,33 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
         string kind,
         string mediaURI,
         uint64 anchoredAt
+    );
+
+    /// Emitted when current custodian proposes a transfer.
+    event CustodyTransferInitiated(
+        bytes32 indexed evidenceId,
+        address indexed from,
+        address indexed to,
+        string purpose,
+        uint64 expectedReturnAt, // 0 if N/A
+        bytes32 offchainContextHash // e.g., IPFS hash of a richer transfer note
+    );
+
+    /// Emitted when the pending custodian accepts the transfer.
+    event CustodyAccepted(
+        bytes32 indexed evidenceId,
+        address indexed from,
+        address indexed to,
+        uint64 acceptedAt
+    );
+
+    /// Emitted when the current custodian returns the evidence to a specific address (e.g., back to previous).
+    event CustodyReturned(
+        bytes32 indexed evidenceId,
+        address indexed from,
+        address indexed to,
+        string note,
+        uint64 returnedAt
     );
 
     constructor(address admin, ISubmitterRegistry registry) {
@@ -67,6 +96,8 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
     function unpause() external onlyRole(ADMIN_ROLE) {
         _unpause();
     }
+
+    // LIFECYCLE
 
     /**
      * @notice Anchor a new piece of evidence.
@@ -110,5 +141,67 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
             mediaURI,
             uint64(block.timestamp)
         );
+    }
+
+    /**
+     * @notice Initiate a transfer to `to`. Requires current custodian. The transfer becomes effective only after `to`
+     * calls `acceptCustody`.
+     */
+    function initiateTransfer(
+        bytes32 evidenceId,
+        address to,
+        string calldata purpose,
+        uint64 expectedReturnAt,
+        bytes32 offchainContextHash
+    ) external whenNotPaused nonReentrant {
+        EvidenceState storage s = _state[evidenceId];
+        require(s.exists, "evidence not found");
+        require(msg.sender == s.currentCustodian, "only custodian");
+        require(to != address(0) && to != s.currentCustodian, "bad recipient");
+
+        s.pendingCustodian = to;
+
+        emit CustodyTransferInitiated(
+            evidenceId,
+            s.currentCustodian,
+            to,
+            purpose,
+            expectedReturnAt,
+            offchainContextHash
+        );
+    }
+
+    /**
+     * @notice Accept a pending transfer. Caller must match `pendingCustodian`.
+     */
+    function acceptCustody(bytes32 evidenceId) external whenNotPaused nonReentrant {
+        EvidenceState storage s = _state[evidenceId];
+        require(s.exists, "evidence not found");
+        require(s.pendingCustodian != address(0), "no pending transfer");
+        address from = s.currentCustodian;
+        address to = s.pendingCustodian;
+        require(msg.sender == to, "only pending custodian");
+
+        s.currentCustodian = to;
+        s.pendingCustodian = address(0);
+
+        emit CustodyAccepted(evidenceId, from, to, uint64(block.timestamp));
+    }
+
+    /**
+     * @notice Return evidence from current custodian to `to` (e.g., the prior custodian).
+     *         This is a one-step action by the current custodian (no accept needed).
+     */
+    function returnCustody(bytes32 evidenceId, address to, string calldata note) external whenNotPaused nonReentrant {
+        EvidenceState storage s = _state[evidenceId];
+        require(s.exists, "evidence not found");
+        require(msg.sender == s.currentCustodian, "only custodian");
+        require(to != address(0) && to != s.currentCustodian, "bad recipient");
+
+        address from = s.currentCustodian;
+        s.currentCustodian = to;
+        s.pendingCustodian = address(0);
+
+        emit CustodyReturned(evidenceId, from, to, note, uint64(block.timestamp));
     }
 }
