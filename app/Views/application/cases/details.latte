@@ -259,21 +259,6 @@
 
           {* Evidence tab *}
             <div class="tab-pane" id="tab-evidence">
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="text-secondary">
-                  {if count($evidences) > 0}
-                    {count($evidences)} item{if count($evidences) !== 1}s{/if}
-                  {else}
-                    No evidence yet
-                  {/if}
-                </div>
-                <div>
-                  <a href="/cases/{$case->id}/evidence/new" class="btn btn-primary">
-                    Add evidence
-                  </a>
-                </div>
-              </div>
-
               {if count($evidences) === 0}
                 <div class="empty">
                   <div class="empty-img">
@@ -289,6 +274,20 @@
                   </div>
                 </div>
               {else}
+                  <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="text-secondary">
+                      {if count($evidences) > 0}
+                        {count($evidences)} item{if count($evidences) !== 1}s{/if}
+                      {else}
+                        No evidence yet
+                      {/if}
+                    </div>
+                    <div>
+                      <a href="/cases/{$case->id}/evidence/new" class="btn btn-primary">
+                        Add evidence
+                      </a>
+                    </div>
+                  </div>
                 <div class="card card-borderless">
                   <div class="table-responsive">
                     <table class="table table-vcenter card-table">
@@ -323,7 +322,7 @@
                             </span>
                           </td>
                           <td>
-                            <div class="fw-bold">{$ev->title}</div>
+                            <div class="fw-bold"><a href="/cases/{$case->id}/evidences/{$ev->id}">{$ev->title}</a></div>
                             <div class="text-secondary small">
                               {if $ev->physical_tag}<span class="me-2">Tag: <code>{$ev->physical_tag}</code></span>{/if}
                               {if $ev->serial}<span class="me-2">ID: <code>{$ev->serial}</code></span>{/if}
