@@ -27,6 +27,11 @@ final class EvidenceFileBroker extends Broker
         return $this->query($sql, $params)->id;
     }
 
+    public function findById(string $id): ?stdClass
+    {
+        return $this->selectSingle('SELECT * FROM legal.evidence_file WHERE id = :id', ['id' => $id]);
+    }
+
     public function listForEvidence(string $evidenceId): array
     {
         return $this->select(
