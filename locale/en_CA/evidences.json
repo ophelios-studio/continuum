@@ -1,0 +1,28 @@
+{
+  "evidences": {
+    "errors": {
+      "title_required": "The <b>title</b> must not be empty.",
+      "title_too_long": "The <b>title</b> is too long.",
+      "kind_required": "The <b>kind</b> must not be empty.",
+      "kind_invalid": "The selected <b>kind</b> is invalid.",
+      "jurisdiction_required": "The <b>jurisdiction</b> must not be empty.",
+      "jurisdiction_invalid": "The <b>jurisdiction</b> format is invalid. Use something like <code>CA-QC</code>.",
+      "description_too_long": "The <b>description</b> exceeds the maximum allowed length.",
+      "external_uri_invalid": "The <b>external reference</b> must be a valid URL.",
+      "physical_tag_too_long": "The <b>physical tag</b> is too long.",
+      "serial_too_long": "The <b>serial / identifier</b> is too long.",
+      "affirm_required": "You must confirm you have the right to submit this <b>evidence</b>."
+    },
+
+    "success": {
+      "created": "Evidence <b>{title}</b> has been created for case <b>{case_ref}</b> 🎉.",
+      "updated": "Evidence <b>{title}</b> has been updated.",
+      "file_attached": "File <b>{filename}</b> was attached to <b>{title}</b>.",
+      "file_removed": "File <b>{filename}</b> was removed from <b>{title}</b>.",
+      "anchored": "Evidence <b>{title}</b> anchored on-chain 🎉. Tx hash: <code>{tx}</code>.",
+      "transfer_initiated": "Transfer to <b>{to_wallet}</b> initiated for <b>{title}</b>.",
+      "transfer_accepted": "<b>{to_wallet}</b> accepted custody for <b>{title}</b>.",
+      "returned": "Evidence <b>{title}</b> was returned to <b>{to_wallet}</b>."
+    }
+  }
+}
