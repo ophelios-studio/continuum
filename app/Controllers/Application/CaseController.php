@@ -35,6 +35,34 @@ class CaseController extends AppController
         ]);
     }
 
+    #[Get('/{id}')]
+    public function show(string $id): Response
+    {
+        $actor = Actor::build(Session::get('actor'));
+        $service = new LegalCaseService();
+        $case = $service->findById($id);
+        if (!$case) {
+            return $this->redirect("/cases");
+        }
+
+        $isParticipant = $service->isParticipant($id, $actor->address);
+        $orgId = $actor->organization_id;
+        $discoverable =
+            ($case->visibility === 'PUBLIC') ||
+            ($case->visibility === 'ORG' && $orgId && $orgId === $case->organization_id);
+
+        if (!$isParticipant && !$discoverable) {
+            Flash::error("You do not have access to this case.");
+            return $this->redirect("/cases");
+        }
+
+        return $this->render('application/cases/details', [
+            'case' => $case,
+            'participants' => $service->findAllParticipants($id),
+            'events' => $service->findAllEvents($id)
+        ]);
+    }
+
     #[Post("/")]
     public function create(): Response
     {

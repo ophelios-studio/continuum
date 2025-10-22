@@ -1,0 +1,338 @@
+{layout ../../layouts/main.latte}
+
+{varType array $case}
+{varType array $participants}
+{varType array $events}
+
+{block content}
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="d-flex align-items-center gap-2">
+          <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
+            {=substr($case->ref_code ?? 'C', 0, 1)}
+          </span>
+          <div>
+            <h2 class="page-title mb-0">
+              {$case->ref_code} — {$case->title}
+            </h2>
+            <div class="text-secondary small">
+              Case ID {$case->id}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <a href="/cases" class="btn btn-light">← Back to cases</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    {php
+      $statusClass = match($c->status) {
+        'OPEN' => 'bg-green-lt',
+        'CLOSED' => 'bg-orange-lt',
+        'ARCHIVED' => 'bg-dark-lt',
+        default => 'bg-secondary'
+      };
+      $visClass = match($c->visibility) {
+        'PRIVATE' => 'bg-red text-red-fg',
+        'ORG' => 'bg-blue',
+        'PUBLIC' => 'bg-teal',
+        default => 'bg-secondary',
+      };
+      $sensClass = ($c->sensitivity === 'SEALED') ? 'bg-red-lt' : 'bg-green-lt';
+
+
+      $me = strtolower($_SESSION['wallet'] ?? '');
+      $myRole = null;
+      foreach ($participants as $p) {
+        if (strtolower($p->address) === $me) { $myRole = $p->role; break; }
+      }
+      $isOwner = ($myRole === 'OWNER');
+      $isEditor = ($myRole === 'EDITOR' || $isOwner);
+    }
+
+    <!-- Header summary -->
+    <div class="row row-deck row-cards mb-3">
+      <div class="col-12 col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="text-secondary">Status</div>
+                <div class="mt-1">
+                  <span class="badge {$statusClass}">{$case->status}</span>
+                </div>
+              </div>
+              {if $isOwner}
+                <form action="/cases/{$case->id}/status" method="post" class="d-flex align-items-center gap-2">
+                  <select name="status" class="form-select">
+                    <option value="OPEN" {if $case->status==='OPEN'}selected{/if}>OPEN</option>
+                    <option value="CLOSED" {if $case->status==='CLOSED'}selected{/if}>CLOSED</option>
+                    <option value="ARCHIVED" {if $case->status==='ARCHIVED'}selected{/if}>ARCHIVED</option>
+                  </select>
+                  <button class="btn btn-outline">Update</button>
+                </form>
+              {/if}
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mt-3">
+              <div>
+                <div class="text-secondary">Visibility</div>
+                <div class="mt-1">
+                  <span class="badge {$visClass}">{strtolower($case->visibility)}</span>
+                </div>
+              </div>
+              <div>
+                <div class="text-secondary">Sensitivity</div>
+                <div class="mt-1">
+                  <span class="badge {$sensClass}">{strtolower($case->sensitivity)}</span>
+                </div>
+              </div>
+              <div>
+                <div class="text-secondary">Jurisdiction</div>
+                <div class="mt-1">
+                  <code>{$case->jurisdiction}</code>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <div class="text-secondary">Description</div>
+              <div class="mt-1">
+                {if $case->description !== ''}{$case->description}{else}<span class="text-secondary">No description.</span>{/if}
+              </div>
+            </div>
+
+            <div class="mt-3 text-secondary small">
+              <div>Created: {$case->created_at|date}</div>
+              <div>Updated: {$case->updated_at|date}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Participants card -->
+      <div class="col-12 col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Participants</h3>
+            {if $isOwner}
+              <div class="card-actions">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-add-member">
+                  Add member
+                </button>
+              </div>
+            {/if}
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Wallet</th>
+                    <th>Role</th>
+                    <th>Added</th>
+                    <th class="w-1"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                {if count($participants) === 0}
+                  <tr><td colspan="4" class="text-secondary">No participants yet.</td></tr>
+                {else}
+                  {foreach $participants as $p}
+                    <tr>
+                      <td>
+                        <code>{format('wallet', $p->address)}</code>
+                        {if strtolower($p->address) === $me}
+                          <span class="ms-1 badge bg-blue-lt">You</span>
+                        {/if}
+                      </td>
+                      <td>
+                        {if $isOwner && strtolower($p->address) !== $me}
+                          <form action="/cases/{$case->id}/members/role" method="post" class="d-inline-flex align-items-center gap-2">
+                            <input type="hidden" name="address" value="{$p->address}">
+                            <select name="role" class="form-select form-select-sm">
+                              <option value="OWNER"  {if $p->role === 'OWNER'}selected{/if}>OWNER</option>
+                              <option value="EDITOR" {if $p->role === 'EDITOR'}selected{/if}>EDITOR</option>
+                              <option value="VIEWER" {if $p->role === 'VIEWER'}selected{/if}>VIEWER</option>
+                            </select>
+                            <button class="btn btn-outline btn-sm">Save</button>
+                          </form>
+                        {else}
+                          <span class="badge bg-azure-lt">{$p->role}</span>
+                        {/if}
+                      </td>
+                      <td>
+                        <span class="text-secondary small">
+                          {$p->invited_at|datetime}
+                        </span>
+                      </td>
+                      <td class="text-end">
+                        {if $isOwner && strtolower($p->address) !== $me}
+                          <form action="/cases/{$case->id}/members/remove" method="post">
+                            <input type="hidden" name="address" value="{$p->address}">
+                            <button class="btn btn-link text-danger p-0"
+                                    onclick="return confirm('Remove this member?');">
+                              Remove
+                            </button>
+                          </form>
+                        {/if}
+                      </td>
+                    </tr>
+                  {/foreach}
+                {/if}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card">
+      <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+          <li class="nav-item">
+            <a href="#tab-overview" class="nav-link active" data-bs-toggle="tab">Overview</a>
+          </li>
+          <li class="nav-item">
+            <a href="#tab-evidence" class="nav-link" data-bs-toggle="tab">Evidence</a>
+          </li>
+          <li class="nav-item">
+            <a href="#tab-activity" class="nav-link" data-bs-toggle="tab">Activity</a>
+          </li>
+        </ul>
+      </div>
+      <div class="card-body">
+        <div class="tab-content">
+
+          <!-- Overview -->
+          <div class="tab-pane active show" id="tab-overview">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <div class="card card-borderless">
+                  <div class="card-status-top bg-blue"></div>
+                  <div class="card-body">
+                    <h3 class="card-title">Case metadata</h3>
+                    <dl class="row">
+                      <dt class="col-5 text-secondary">Ref code</dt>
+                      <dd class="col-7"><code>{$case->ref_code}</code></dd>
+
+                      <dt class="col-5 text-secondary">Created by</dt>
+                      <dd class="col-7"><code>{$case->created_by}</code></dd>
+
+                      <dt class="col-5 text-secondary">Organization</dt>
+                      <dd class="col-7">{$case->organization_id ?? '—'}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <div class="card card-borderless">
+                  <div class="card-status-top bg-teal"></div>
+                  <div class="card-body">
+                    <h3 class="card-title">Next steps</h3>
+                    <ol class="text-secondary">
+                      <li>Add evidence to this case (files, URLs, physical asset records).</li>
+                      <li>When you transfer custody, log it on-chain (step C).</li>
+                      <li>Invite collaborators if needed.</li>
+                    </ol>
+                    <div class="mt-2">
+                      <a class="btn btn-primary disabled" href="#" aria-disabled="true" title="Coming next in Step B">
+                        Add evidence
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> <!-- /row -->
+          </div>
+
+          <!-- Evidence (placeholder until Step B) -->
+          <div class="tab-pane" id="tab-evidence">
+            <div class="empty">
+              <div class="empty-img">
+                {include "zf-undraw", "collecting"}
+              </div>
+              <p class="empty-title">No evidence yet</p>
+              <div class="empty-action">
+                <a href="#" class="btn btn-primary disabled" aria-disabled="true">Add evidence</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="tab-pane" id="tab-activity">
+            {if count($events) === 0}
+              <div class="text-secondary">No activity yet.</div>
+            {else}
+              <div class="timeline">
+                {foreach $events as $ev}
+                  <div class="timeline-item">
+                    <div class="timeline-media bg-blue-lt"></div>
+                    <div class="timeline-content">
+                      <div class="d-flex justify-content-between">
+                        <strong>{$ev->kind}</strong>
+                        <span class="text-secondary small">{$ev->created_at|datetime}</span>
+                      </div>
+                      <div class="text-secondary small mt-1">
+                        by <code>{format('wallet', $ev->actor)}</code>
+                      </div>
+                      {if $ev->data && (is_array($ev->data) && count($ev->data))}
+                        <div class="mt-2">
+                          <pre class="code code-block">{$ev->data|noescape}</pre>
+                        </div>
+                      {/if}
+                    </div>
+                  </div>
+                {/foreach}
+              </div>
+            {/if}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{if $isOwner}
+<div class="modal modal-blur fade" id="modal-add-member" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <form class="modal-content" action="/cases/{$case->id}/members/add" method="post">
+      <div class="modal-header">
+        <h5 class="modal-title">Add member</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label required">Wallet address</label>
+          <input type="text" class="form-control" name="address" placeholder="0x…" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label required">Role</label>
+          <select name="role" class="form-select" required>
+            <option value="VIEWER" selected>Viewer</option>
+            <option value="EDITOR">Editor</option>
+            <option value="OWNER">Owner</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+        <button type="submit" class="btn btn-primary ms-auto">Add</button>
+      </div>
+    </form>
+  </div>
+</div>
+{/if}
+{/block}
