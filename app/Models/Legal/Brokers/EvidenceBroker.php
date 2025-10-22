@@ -35,7 +35,33 @@ final class EvidenceBroker extends Broker
             'status' => $new->status ?? 'DRAFT',
         ];
 
-        return $this->query($sql, $params)->id;
+        $id = $this->query($sql, $params)->id;
+        $this->createRevision($id, $submitter->address);
+        return $id;
+    }
+
+    public function createRevision(string $evidenceId, string $createdBy, ?string $contentHash = null, ?string $mediaUri = null): int
+    {
+        $zeroB32 = '0x' . str_repeat('0', 64);
+        $content = $contentHash ?: $zeroB32;
+        $sql = "
+            INSERT INTO legal.evidence_revision (evidence_id, rev_no, content_hash, media_uri, created_by)
+            SELECT
+                :evidence_id,
+                COALESCE(MAX(rev_no) + 1, 1) AS next_rev,
+                :content_hash,
+                :media_uri,
+                :created_by
+            FROM legal.evidence_revision
+            WHERE evidence_id = :evidence_id
+            RETURNING id";
+        $row = $this->query($sql, [
+            'evidence_id' => $evidenceId,
+            'content_hash' => $content,
+            'media_uri' => $mediaUri,
+            'created_by' => strtolower($createdBy),
+        ]);
+        return $row->id;
     }
 
     public function findById(string $id): ?stdClass

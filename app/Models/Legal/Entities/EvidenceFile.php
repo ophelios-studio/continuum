@@ -6,6 +6,7 @@ final class EvidenceFile extends Entity
 {
     public string $id;
     public string $evidence_id;
+    public int $revision_id;
     public string $filename;
     public ?string $mime_type;
     public ?int $byte_size;
