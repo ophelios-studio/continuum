@@ -1,5 +1,6 @@
 <?php namespace Models\Core;
 
+use Latte\Essential\RawPhpExtension;
 use Pulsar\Latte\PulsarLatteExtension;
 use Zephyrus\Application\Configuration;
 use Zephyrus\Application\Views\LatteEngine;
@@ -35,6 +36,7 @@ final class Application extends BaseApplication
         $engine = parent::getRenderEngine();
         if ($engine instanceof LatteEngine) {
             $engine->addExtension(new PulsarLatteExtension());
+            $engine->addExtension(new RawPhpExtension);
         }
         return $engine;
     }
