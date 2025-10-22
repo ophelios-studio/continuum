@@ -270,7 +270,7 @@
                     and manage custody transfers.
                   </p>
                   <div class="empty-action">
-                    <a href="/cases/{$case->id}/evidence/new" class="btn btn-primary">Add evidence</a>
+                    <a href="/cases/{$case->id}/evidences/new" class="btn btn-primary">Add evidence</a>
                   </div>
                 </div>
               {else}
@@ -283,7 +283,7 @@
                       {/if}
                     </div>
                     <div>
-                      <a href="/cases/{$case->id}/evidence/new" class="btn btn-primary">
+                      <a href="/cases/{$case->id}/evidences/new" class="btn btn-primary">
                         Add evidence
                       </a>
                     </div>
@@ -326,7 +326,7 @@
                             <div class="text-secondary small">
                               {if $ev->physical_tag}<span class="me-2">Tag: <code>{$ev->physical_tag}</code></span>{/if}
                               {if $ev->serial}<span class="me-2">ID: <code>{$ev->serial}</code></span>{/if}
-                              <span class="me-2">Jurisdiction: <code>{$ev->jurisdiction}</code></span>
+                              <span n:if="$ev->jurisdiction != $case->jurisdiction" class="me-2">Jurisdiction: <code>{$ev->jurisdiction}</code></span>
                               {if $ev->evidence_id_hex}
                                 <span class="me-2">EvidenceId: <code class="text-nowrap">{$ev->evidence_id_hex|truncate:18}</code></span>
                               {/if}
