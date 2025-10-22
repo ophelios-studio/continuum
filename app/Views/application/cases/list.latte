@@ -1,0 +1,168 @@
+{layout ../../layouts/main.latte}
+
+{varType array $cases}
+{varType ?string $filter_status}
+{varType ?string $filter_q}
+
+{block content}
+<div class="page-header d-print-none">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">Cases</h2>
+        <div class="text-secondary mt-1">
+          Browse and manage your cases. Use search and filters to narrow results.
+        </div>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <a href="/cases/new" class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+               viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z"/>
+            <path d="M12 5l0 14" />
+            <path d="M5 12l14 0" />
+          </svg>
+          New case
+        </a>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row g-2 align-items-end mt-2">
+      <div class="col-12">
+        <form class="row g-2" method="get" action="/cases" nocsrf="true">
+          <div class="col-md-4">
+            <label class="form-label">Search</label>
+            <div class="input-icon">
+              <span class="input-icon-addon">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z"/>
+                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                  <path d="M21 21l-6 -6" />
+                </svg>
+              </span>
+              <input type="text" class="form-control" name="q" placeholder="Title or ref code…"
+                     value="{$filter_q}">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+              <option value="" {if !$filter_status}selected{/if}>Any</option>
+              <option value="OPEN" {if $filter_status === 'OPEN'}selected{/if}>Open</option>
+              <option value="CLOSED" {if $filter_status === 'CLOSED'}selected{/if}>Closed</option>
+              <option value="ARCHIVED" {if $filter_status === 'ARCHIVED'}selected{/if}>Archived</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary" type="submit">Apply</button>
+              <a class="btn btn-light" href="/cases">Reset</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+
+    {if count($cases) === 0}
+      <div class="empty">
+        <div class="empty-img">
+            {include "zf-undraw", localize("collecting")}
+        </div>
+        <p class="empty-title">No cases found</p>
+        <p class="empty-subtitle text-secondary">
+          Try adjusting your filters, or create your first case.
+        </p>
+        <div class="empty-action">
+          <a href="/cases/new" class="btn btn-primary">
+            Create case
+          </a>
+        </div>
+      </div>
+    {else}
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+              <thead>
+                <tr>
+                  <th style="width: 1%"></th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Visibility</th>
+                  <th>Sensitivity</th>
+                  <th>Jurisdiction</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+              {foreach $cases as $c}
+                {varType Models\Legal\Entities\LegalCase $c}
+                {php
+                  $statusClass = match($c->status) {
+                    'OPEN' => 'bg-green-lt',
+                    'CLOSED' => 'bg-orange-lt',
+                    'ARCHIVED' => 'bg-dark-lt',
+                    default => 'bg-secondary'
+                  };
+                  $visClass = match($c->visibility) {
+                    'PRIVATE' => 'bg-red text-red-fg',
+                    'ORG' => 'bg-blue',
+                    'PUBLIC' => 'bg-teal',
+                    default => 'bg-secondary',
+                  };
+                  $sensClass = ($c->sensitivity === 'SEALED') ? 'bg-red-lt' : 'bg-green-lt';
+                }
+                <tr>
+                  <td>
+                    <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
+                      {=substr($c->ref_code ?? 'C', 0, 1)}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="text-reset">
+                      <a href="/cases/{$c->id}" class="fw-bold">{$c->title}</a>
+                    </div>
+                    <div class="text-secondary small">{$c->ref_code}</div>
+                  </td>
+                  <td>
+                    <span class="badge {$statusClass}">{strtolower($c->status)}</span>
+                  </td>
+                  <td>
+                    <span class="badge {$visClass}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock-search"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.5 21h-4.5a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2h10" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /><path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M20.2 20.2l1.8 1.8" /></svg>
+                        {strtolower($c->visibility)}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge {$sensClass}">{$c->sensitivity}</span>
+                  </td>
+                  <td>
+                    <code>{$c->jurisdiction}</code>
+                  </td>
+                  <td>
+                    <div>{$c->updated_at|date}</div>
+                    <div class="text-secondary small">{format('duration', strtotime($c->updated_at))}</div>
+                  </td>
+                </tr>
+              {/foreach}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    {/if}
+
+  </div>
+</div>
+{/block}
