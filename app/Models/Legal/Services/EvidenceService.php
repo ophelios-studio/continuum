@@ -104,10 +104,9 @@ final readonly class EvidenceService
         string $evidenceIdHex,
         string $contentHash,
         ?string $mediaUri,
-        string $txHash,
-        ?string $anchoredAtIso = null
+        string $txHash
     ): void {
-        $this->evidence->updateAnchorInfo($evidenceId, $evidenceIdHex, $contentHash, $mediaUri, $txHash, $anchoredAtIso);
+        $this->evidence->updateAnchorInfo($evidenceId, $evidenceIdHex, $contentHash, $mediaUri, $txHash);
         $this->events->append($evidenceId, $actorWallet, 'ANCHORED', [
             'evidence_id_hex' => strtolower($evidenceIdHex),
             'content_hash' => strtolower($contentHash),
@@ -116,7 +115,7 @@ final readonly class EvidenceService
         ]);
     }
 
-    public function initiateTransfer(int $evidenceId, string $fromWallet, string $toWallet, ?string $purpose = null, ?string $expectedReturnIso = null, ?string $offchainContextHash = null): void
+    public function initiateTransfer(string $evidenceId, string $fromWallet, string $toWallet, ?string $purpose = null, ?string $expectedReturnIso = null, ?string $offchainContextHash = null): void
     {
         $this->evidence->setPendingCustodian($evidenceId, $toWallet);
         $data = [
@@ -129,7 +128,7 @@ final readonly class EvidenceService
         $this->events->append($evidenceId, $fromWallet, 'TRANSFER_INITIATED', $data);
     }
 
-    public function acceptTransfer(int $evidenceId, string $toWallet): void
+    public function acceptTransfer(string $evidenceId, string $toWallet): void
     {
         $this->evidence->acceptCustody($evidenceId, $toWallet);
         $this->events->append($evidenceId, $toWallet, 'TRANSFER_ACCEPTED', [
@@ -137,7 +136,7 @@ final readonly class EvidenceService
         ]);
     }
 
-    public function returnCustody(int $evidenceId, string $fromWallet, string $toWallet, ?string $note = null): void
+    public function returnCustody(string $evidenceId, string $fromWallet, string $toWallet, ?string $note = null): void
     {
         $this->evidence->returnCustody($evidenceId, $toWallet);
         $data = [
@@ -152,7 +151,7 @@ final readonly class EvidenceService
     /**
      * @return array<EvidenceFile>
      */
-    public function listFiles(int $evidenceId): array
+    public function listFiles(string $evidenceId): array
     {
         return EvidenceFile::buildArray($this->files->listForEvidence($evidenceId));
     }
@@ -160,7 +159,7 @@ final readonly class EvidenceService
     /**
      * @return array<EvidenceEvent>
      */
-    public function listEvents(int $evidenceId): array
+    public function listEvents(string $evidenceId): array
     {
         return EvidenceEvent::buildArray($this->events->listForEvidence($evidenceId));
     }
