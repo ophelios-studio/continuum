@@ -242,21 +242,20 @@
                     <h3 class="card-title">Next steps</h3>
                     <ol class="text-secondary">
                       <li>Add evidence to this case (files, URLs, physical asset records).</li>
-                      <li>When you transfer custody, log it on-chain (step C).</li>
+                      <li>When you transfer custody, log it on-chain.</li>
                       <li>Invite collaborators if needed.</li>
                     </ol>
                     <div class="mt-2">
-                      <a class="btn btn-primary disabled" href="#" aria-disabled="true" title="Coming next in Step B">
+                      <a class="btn btn-primary" href="/cases/{$case->id}/evidences/new" aria-disabled="true">
                         Add evidence
                       </a>
                     </div>
                   </div>
                 </div>
               </div>
-            </div> <!-- /row -->
+            </div>
           </div>
 
-          <!-- Evidence (placeholder until Step B) -->
           <div class="tab-pane" id="tab-evidence">
             <div class="empty">
               <div class="empty-img">
@@ -264,7 +263,7 @@
               </div>
               <p class="empty-title">No evidence yet</p>
               <div class="empty-action">
-                <a href="#" class="btn btn-primary disabled" aria-disabled="true">Add evidence</a>
+                <a href="/cases/{$case->id}/evidences/new" class="btn btn-primary" aria-disabled="true">Add evidence</a>
               </div>
             </div>
           </div>
