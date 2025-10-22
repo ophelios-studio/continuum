@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+import "../Roles.sol";
+
 interface ISubmitterRegistry {
-    /// @return Return true if `who` is currently allowed to anchor evidence.
-    function isRegistered(address who) external view returns (bool);
+    /// Returns the current role level for a wallet.
+    function roleLevel(address wallet) external view returns (Roles.RoleLevel);
 }

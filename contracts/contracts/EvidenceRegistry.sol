@@ -80,8 +80,20 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
         submitterRegistry = registry;
     }
 
+    /**
+     * @notice Validates if the given address is a registered submitter
+     * @dev Checks if the address has a valid role level (DECLARED, VERIFIED_L1, or VERIFIED_L2)
+     * @param who The address to validate
+     * @custom:throws "submitter not registered" if the address is not a registered submitter
+     */
     function _requireRegisteredSubmitter(address who) internal view {
-        require(submitterRegistry.isRegistered(who), "submitter not registered");
+        Roles.RoleLevel lvl = submitterRegistry.roleLevel(who);
+        require(
+            lvl == Roles.RoleLevel.DECLARED ||
+            lvl == Roles.RoleLevel.VERIFIED_L1 ||
+            lvl == Roles.RoleLevel.VERIFIED_L2,
+            "submitter not registered"
+        );
     }
 
     function stateOf(bytes32 evidenceId) external view returns (EvidenceState memory s) {
