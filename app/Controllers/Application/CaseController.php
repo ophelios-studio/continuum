@@ -1,6 +1,7 @@
 <?php namespace Controllers\Application;
 
 use Models\Account\Entities\Actor;
+use Models\Legal\Services\EvidenceService;
 use Models\Legal\Services\LegalCaseService;
 use Zephyrus\Application\Flash;
 use Zephyrus\Core\Session;
@@ -59,7 +60,8 @@ class CaseController extends AppController
         return $this->render('application/cases/details', [
             'case' => $case,
             'participants' => $service->findAllParticipants($id),
-            'events' => $service->findAllEvents($id)
+            'events' => $service->findAllEvents($id),
+            'evidences' => new EvidenceService()->listForCase($id)
         ]);
     }
 
