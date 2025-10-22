@@ -37,6 +37,12 @@ render:
   cache_update: !env CACHE_UPDATE
 
 services:
+  web3:
+    chain_id: !env WEB3_CHAIN_ID
+    evidence_registry_addr: !env WEB3_EVIDENCE_REGISTRY_ADDR
+    submitter_registry_addr: !env WEB3_SUBMITTER_REGISTRY_ADDR
+    explorer_tx_base: !env WEB3_EXPLORER_TX_BASE
+
   infura:
     eth_url: !env INFURA_ETH_URL
 
