@@ -68,6 +68,27 @@ final class EvidenceBroker extends Broker
         return $this->select($sql, $params);
     }
 
+    public function updateAnchorInfo(string $id, string $evidenceIdHex, string $contentHash, ?string $mediaUri, string $txHash): void
+    {
+        $sql = "UPDATE legal.evidence
+                SET evidence_id_hex = :hex,
+                    content_hash = :ch,
+                    media_uri = :uri,
+                    anchor_tx = :tx,
+                    anchored_at = COALESCE(:anchored_at, NOW()),
+                    status = 'ANCHORED',
+                    updated_at = NOW(),
+                    anchored_at = NOW()
+                WHERE id = :id";
+        $this->query($sql, [
+            'id' => $id,
+            'hex' => strtolower($evidenceIdHex),
+            'ch' => strtolower($contentHash),
+            'uri' => $mediaUri,
+            'tx' => strtolower($txHash)
+        ]);
+    }
+
     public function setPendingCustodian(string $id, string $toAddress): void
     {
         $sql = "UPDATE legal.evidence
