@@ -94,10 +94,10 @@ abstract class Controller extends BaseController
         $csp = new ContentSecurityPolicy();
         $csp->setFontSources(["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com']);
         $csp->setStyleSources(["'self'", 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', ContentSecurityPolicy::UNSAFE_INLINE]);
-        $csp->setScriptSources(["'self'", 'https://cdn.jsdelivr.net']);
+        $csp->setScriptSources(["'self'", 'https://cdn.jsdelivr.net', ContentSecurityPolicy::UNSAFE_EVAL]);
         $csp->setChildSources(["'self'"]);
         $csp->setWorkerSources(["blob:"]);
-        $csp->setConnectSources(["'self'", 'https://cdn.jsdelivr.net', 'https://esm.sh']);
+        $csp->setConnectSources(["'self'", ContentSecurityPolicy::ANY]);
         $csp->setImageSources(["'self'", 'blob:', 'data:']);
         $csp->setBaseUri([$this->request->getUrl()->getBaseUrl()]);
         $secureHeader->setContentSecurityPolicy($csp);
