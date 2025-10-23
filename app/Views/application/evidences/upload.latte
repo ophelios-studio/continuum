@@ -1,0 +1,198 @@
+{layout ../../layouts/main.latte}
+
+{varType Models\Legal\Entities\LegalCase $case}
+{varType Models\Legal\Entities\Evidence $evidence}
+{varType int $revision_id}
+{varType int $chain_id}
+{varType string $evidence_registry_addr}
+
+{block content}
+    <div class="page-header d-print-none">
+        <div class="container-xl">
+            <div class="row g-2 align-items-center">
+                <div class="col">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
+                            {=substr($evidence->title ?? 'E', 0, 1)}
+                        </span>
+                        <div>
+                            <h2 class="page-title mb-0">Upload encrypted file</h2>
+                            <div class="text-secondary small">
+                                Evidence #{$evidence->id} • Case #{$evidence->case_id} • Revision v{$revision_id}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto ms-auto d-print-none">
+                    <a href="/cases/{$case->id}/evidences/{$evidence->id}" class="btn btn-light">← Back to evidence</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="container-xl">
+
+            <div class="row row-deck row-cards">
+                <div class="col-12 col-lg-8">
+                    <form class="card" id="encUploadForm" onsubmit="return false;">
+                        <div class="card-header">
+                            <h3 class="card-title">Encrypt & Upload (Lit + Lighthouse)</h3>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="mb-3">
+                                <label class="form-label required">File</label>
+                                <input type="file" class="form-control" id="encFile" required>
+                                <div class="form-hint">
+                                    The file will be encrypted <strong>locally</strong> in your browser (AES-GCM) and uploaded as ciphertext.
+                                </div>
+                            </div>
+
+                            <!-- Info: we always use dynamic, contract-based access -->
+
+
+                            <div class="mb-2 text-secondary">
+                                <div>EvidenceId: <code class="text-truncate d-inline-block" style="max-width:100%;">{$evidence->evidence_id_hex}</code></div>
+                                <div>Registry: <code class="text-truncate d-inline-block" style="max-width:100%;">{$evidence_registry_addr}</code></div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <div class="d-flex">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z"/><path d="M12 9v2m0 4v.01"/><path d="M5.07 19h13.86A2.07 2.07 0 0 0 21 16.93L13.93 5.07a2.07 2.07 0 0 0-3.86 0L3 16.93A2.07 2.07 0 0 0 5.07 19z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="alert-title">Dynamic, contract-based access</h4>
+                                        <div class="text-secondary">
+                                            Decryption requires that <code>EvidenceRegistry.currentCustodian(evidenceId)</code> equals the requester’s wallet at the time of decryption. If custody changes on-chain, access updates automatically.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-secondary">
+                                <div class="d-flex">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z"/><path d="M12 9v2m0 4v.01"/><path d="M5.07 19h13.86A2.07 2.07 0 0 0 21 16.93L13.93 5.07a2.07 2.07 0 0 0-3.86 0L3 16.93A2.07 2.07 0 0 0 5.07 19z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="alert-title">Privacy reminder</h4>
+                                        <div class="text-secondary">
+                                            We store only <strong>ciphertext</strong> on IPFS (via Lighthouse). The decryption key is wrapped by Lit and released only if the on-chain rule passes.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="status" class="small text-muted"></div>
+                        </div>
+                        <div class="card-footer d-flex">
+                            <button id="btnUploadEnc" class="btn btn-primary ms-auto">
+                                Encrypt & Upload
+                            </button>
+                        </div>
+
+                        <!-- Hidden wiring -->
+                        <input type="hidden" id="dataUploadUrl" value="/cases/{$case->id}/evidences/{$evidence->id}/files">
+                        <input type="hidden" id="dataEvidenceIdHex" value="{$evidence->evidence_id_hex}">
+                        <input type="hidden" id="dataRegistry" value="{$evidence_registry_addr}">
+                        <input type="hidden" id="dataChainId" value="{$chain_id}">
+                    </form>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <div class="card card-borderless">
+                        <div class="card-status-top bg-teal"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">How it works</h3>
+                            <ol class="text-secondary">
+                                <li>Your wallet signs a short Lit auth message.</li>
+                                <li>The file is encrypted locally (AES-GCM).</li>
+                                <li>The symmetric key is wrapped by Lit using an on-chain check: <code>currentCustodian(evidenceId) == :userAddress</code>.</li>
+                                <li>We upload ciphertext to Lighthouse/IPFS and save the Lit key capsule + rules.</li>
+                            </ol>
+                            <div class="text-secondary small">
+                                When custody moves to a new wallet on-chain, that wallet can decrypt without re-uploading.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {* JS wiring *}
+    <script type="module" nonce="{nonce()}" n:syntax="off">
+        import { encryptAndUploadWithLit } from '/javascripts/modules/litEncryptUpload.js';
+
+        const fileInput   = document.getElementById('encFile');
+        const btn         = document.getElementById('btnUploadEnc');
+        const statusEl    = document.getElementById('status');
+
+        const uploadUrl   = document.getElementById('dataUploadUrl').value;
+        const evidenceIdHex = document.getElementById('dataEvidenceIdHex').value;
+        const registry    = document.getElementById('dataRegistry').value;
+        const chainId     = parseInt(document.getElementById('dataChainId').value, 10);
+
+        const setStatus = (m) => { statusEl.textContent = m || ''; };
+
+        function litChainNameFromId(id) {
+            // Map only what you need for the hackathon demo
+            if (id === 11155111) return 'sepolia';
+            if (id === 1)        return 'ethereum';
+            if (id === 137)      return 'polygon';
+            return 'sepolia';
+        }
+
+        function buildDynamicACC() {
+            const chainName = litChainNameFromId(chainId);
+            return {
+                evmContractConditions: [
+                    {
+                        contractAddress: registry,
+                        chain: chainName,
+                        functionName: 'currentCustodian',
+                        functionParams: [evidenceIdHex], // bytes32 0x…
+                        functionAbi: {
+                            "inputs":[{"internalType":"bytes32","name":"evidenceId","type":"bytes32"}],
+                            "name":"currentCustodian",
+                            "outputs":[{"internalType":"address","name":"","type":"address"}],
+                            "stateMutability":"view",
+                            "type":"function"
+                        },
+                        returnValueTest: { comparator: '=', value: ':userAddress' }
+                    }
+                ]
+            };
+        }
+
+        btn?.addEventListener('click', async () => {
+            if (!fileInput?.files?.length) {
+                alert('Pick a file first');
+                return;
+            }
+            const file = fileInput.files[0];
+            btn.disabled = true;
+            setStatus('Initializing encryption…');
+
+            try {
+                const acc = buildDynamicACC();
+                const res = await encryptAndUploadWithLit({
+                    file,
+                    chain: litChainNameFromId(chainId),
+                    acc,
+                    uploadUrl,
+                    meta: { filename: file.name }
+                });
+                console.log('Uploaded:', res);
+                setStatus('Upload complete');
+                // e.g. window.location.href = `/cases/${{$case->id}}/evidences/${{$evidence->id}}`;
+            } catch (e) {
+                console.error(e);
+                setStatus(e?.message || 'Upload failed');
+                btn.disabled = false;
+            }
+        });
+    </script>
+{/block}
