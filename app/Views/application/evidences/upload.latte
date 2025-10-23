@@ -94,6 +94,7 @@
 
                         <!-- Hidden wiring -->
                         <input type="hidden" id="dataUploadUrl" value="/cases/{$case->id}/evidences/{$evidence->id}/files">
+                        <input type="hidden" id="dataRedirectUrl" value="/cases/{$case->id}/evidences/{$evidence->id}">
                         <input type="hidden" id="dataEvidenceIdHex" value="{$evidence->evidence_id_hex}">
                         <input type="hidden" id="dataRegistry" value="{$evidence_registry_addr}">
                         <input type="hidden" id="dataChainId" value="{$chain_id}">
@@ -123,13 +124,14 @@
     </div>
 
     <script type="module" nonce="{nonce()}" n:syntax="off">
-        import { encryptAndUploadWithLit } from '/javascripts/modules/litEncryptUpload.js';
+        import { encrypt } from '/javascripts/modules/litEncrypt.js';
 
         const fileInput = document.getElementById('encFile');
         const btn = document.getElementById('btnUploadEnc');
         const statusEl = document.getElementById('status');
 
         const uploadUrl = document.getElementById('dataUploadUrl').value;
+        const redirectUrl = document.getElementById('dataRedirectUrl').value;
         const evidenceIdHex = document.getElementById('dataEvidenceIdHex').value;
         const registry = document.getElementById('dataRegistry').value;
 
@@ -144,7 +146,7 @@
             setStatus('Encrypting...');
 
             try {
-                const res = await encryptAndUploadWithLit({
+                const res = await encrypt({
                     file: fileInput.files[0],
                     chain: 'sepolia',
                     registry,
@@ -153,8 +155,8 @@
                     meta: { filename: fileInput.files[0].name }
                 });
                 console.log('Uploaded:', res);
-                setStatus('Upload complete');
-                setTimeout(() => window.location.reload(), 1000);
+                setStatus('Upload complete.');
+                setTimeout(() => window.location.url = redirectUrl, 1000);
             } catch (e) {
                 console.error(e);
                 setStatus(e?.message || 'Upload failed');
