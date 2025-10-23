@@ -35,7 +35,7 @@
 
             <div class="row row-deck row-cards">
                 <div class="col-12 col-lg-8">
-                    <form class="card" id="encUploadForm" onsubmit="return false;">
+                    <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Encrypt & Upload (Lit + Lighthouse)</h3>
                         </div>
@@ -97,7 +97,7 @@
                         <input type="hidden" id="dataEvidenceIdHex" value="{$evidence->evidence_id_hex}">
                         <input type="hidden" id="dataRegistry" value="{$evidence_registry_addr}">
                         <input type="hidden" id="dataChainId" value="{$chain_id}">
-                    </form>
+                    </div>
                 </div>
 
                 <div class="col-12 col-lg-4">
@@ -122,72 +122,39 @@
         </div>
     </div>
 
-    {* JS wiring *}
     <script type="module" nonce="{nonce()}" n:syntax="off">
         import { encryptAndUploadWithLit } from '/javascripts/modules/litEncryptUpload.js';
 
-        const fileInput   = document.getElementById('encFile');
-        const btn         = document.getElementById('btnUploadEnc');
-        const statusEl    = document.getElementById('status');
+        const fileInput = document.getElementById('encFile');
+        const btn = document.getElementById('btnUploadEnc');
+        const statusEl = document.getElementById('status');
 
-        const uploadUrl   = document.getElementById('dataUploadUrl').value;
+        const uploadUrl = document.getElementById('dataUploadUrl').value;
         const evidenceIdHex = document.getElementById('dataEvidenceIdHex').value;
-        const registry    = document.getElementById('dataRegistry').value;
-        const chainId     = parseInt(document.getElementById('dataChainId').value, 10);
+        const registry = document.getElementById('dataRegistry').value;
 
         const setStatus = (m) => { statusEl.textContent = m || ''; };
 
-        function litChainNameFromId(id) {
-            // Map only what you need for the hackathon demo
-            if (id === 11155111) return 'sepolia';
-            if (id === 1)        return 'ethereum';
-            if (id === 137)      return 'polygon';
-            return 'sepolia';
-        }
-
-        function buildDynamicACC() {
-            const chainName = litChainNameFromId(chainId);
-            return {
-                evmContractConditions: [
-                    {
-                        contractAddress: registry,
-                        chain: chainName,
-                        functionName: 'currentCustodian',
-                        functionParams: [evidenceIdHex], // bytes32 0x…
-                        functionAbi: {
-                            "inputs":[{"internalType":"bytes32","name":"evidenceId","type":"bytes32"}],
-                            "name":"currentCustodian",
-                            "outputs":[{"internalType":"address","name":"","type":"address"}],
-                            "stateMutability":"view",
-                            "type":"function"
-                        },
-                        returnValueTest: { comparator: '=', value: ':userAddress' }
-                    }
-                ]
-            };
-        }
-
         btn?.addEventListener('click', async () => {
             if (!fileInput?.files?.length) {
-                alert('Pick a file first');
+                alert('You must add a file.');
                 return;
             }
-            const file = fileInput.files[0];
             btn.disabled = true;
-            setStatus('Initializing encryption…');
+            setStatus('Encrypting...');
 
             try {
-                const acc = buildDynamicACC();
                 const res = await encryptAndUploadWithLit({
-                    file,
-                    chain: litChainNameFromId(chainId),
-                    acc,
+                    file: fileInput.files[0],
+                    chain: 'sepolia',
+                    registry,
+                    evidenceIdHex,
                     uploadUrl,
-                    meta: { filename: file.name }
+                    meta: { filename: fileInput.files[0].name }
                 });
                 console.log('Uploaded:', res);
                 setStatus('Upload complete');
-                // e.g. window.location.href = `/cases/${{$case->id}}/evidences/${{$evidence->id}}`;
+                setTimeout(() => window.location.reload(), 1000);
             } catch (e) {
                 console.error(e);
                 setStatus(e?.message || 'Upload failed');
