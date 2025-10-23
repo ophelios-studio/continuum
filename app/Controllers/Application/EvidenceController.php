@@ -89,6 +89,7 @@ class EvidenceController extends AppController
 
         return $this->render('application/evidences/details', [
             'evidence' => $evidence,
+            'case' => $case,
             'files' => $evs->listFiles($id),
             'events' => $evs->listEvents($id),
             'evidence_registry_addr' => $registry,
