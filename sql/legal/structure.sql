@@ -82,25 +82,10 @@ CREATE INDEX IF NOT EXISTS evidence_submitter_idx ON legal.evidence (LOWER(submi
 CREATE INDEX IF NOT EXISTS evidence_current_custodian_idx ON legal.evidence (LOWER(current_custodian));
 CREATE INDEX IF NOT EXISTS evidence_created_desc_idx ON legal.evidence (created_at DESC);
 
-CREATE TABLE IF NOT EXISTS legal.evidence_revision
-(
-    id BIGSERIAL PRIMARY KEY,
-    evidence_id UUID NOT NULL REFERENCES legal.evidence(id) ON DELETE CASCADE,
-    rev_no INTEGER NOT NULL, -- 1, 2, 3...
-    content_hash TEXT NOT NULL, -- bytes32 0x...
-    media_uri TEXT, -- ipfs://manifest.json (encrypted)
-    anchor_tx TEXT,
-    anchored_at TIMESTAMPTZ,
-    created_by TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE (evidence_id, rev_no)
-);
-
 CREATE TABLE IF NOT EXISTS legal.evidence_file
 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     evidence_id UUID NOT NULL REFERENCES legal.evidence(id) ON DELETE CASCADE,
-    revision_id BIGINT NOT NULL REFERENCES legal.evidence_revision(id) ON DELETE CASCADE,
     filename TEXT NOT NULL,
     mime_type TEXT,
     byte_size BIGINT,
