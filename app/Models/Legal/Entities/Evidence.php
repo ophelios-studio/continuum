@@ -1,6 +1,5 @@
 <?php namespace Models\Legal\Entities;
 
-use Models\Legal\Brokers\EvidenceRevisionBroker;
 use Zephyrus\Core\Entity\Entity;
 
 final class Evidence extends Entity
@@ -25,13 +24,4 @@ final class Evidence extends Entity
     public string $status;
     public string $created_at;
     public string $updated_at;
-    private ?EvidenceRevision $currentRevision;
-
-    public function getCurrentRevision(): ?EvidenceRevision
-    {
-        if (is_null($this->currentRevision)) {
-            $this->currentRevision = EvidenceRevision::build(new EvidenceRevisionBroker()->findCurrentForEvidence($this->id));
-        }
-        return $this->currentRevision;
-    }
 }
