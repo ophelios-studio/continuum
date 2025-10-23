@@ -7,22 +7,23 @@ final class EvidenceFileBroker extends Broker
 {
     public function insert(stdClass $new): string
     {
-        $sql = "INSERT INTO legal.evidence_file(evidence_id, filename, mime_type, byte_size, sha256_hex, keccak256_hex,
-             storage_provider, storage_cid, storage_uri, encrypted)
-                VALUES (:evidence_id, :filename, :mime_type, :byte_size, :sha256_hex, :keccak256_hex,
-                     :storage_provider, :storage_cid, :storage_uri, :encrypted)
+        $sql = "INSERT INTO legal.evidence_file (evidence_id, filename, mime_type, byte_size, sha256_hex, keccak256_hex, 
+                                 storage_provider, storage_cid, storage_uri, encrypted, lit_meta_json) 
+                VALUES (:evidence_id, :filename, :mime_type, :byte_size, :sha256_hex, :keccak256_hex, 
+                        :storage_provider, :storage_cid, :storage_uri, :encrypted, :lit_meta_json)
                 RETURNING id";
         $params = [
             'evidence_id' => $new->evidence_id,
             'filename' => $new->filename,
-            'mime_type' => $new->mime_type ?? null,
-            'byte_size' => isset($new->byte_size) ? (int) $new->byte_size : null,
-            'sha256_hex' => $new->sha256_hex ?? null,
-            'keccak256_hex' => isset($new->keccak256_hex) ? strtolower($new->keccak256_hex) : null,
-            'storage_provider' => $new->storage_provider ?? null,
-            'storage_cid' => $new->storage_cid ?? null,
-            'storage_uri' => $new->storage_uri ?? null,
-            'encrypted' => (bool) ($new->encrypted ?? false),
+            'mime_type' => $new->mime_type,
+            'byte_size' => $new->byte_size,
+            'sha256_hex' => $new->sha256_hex,
+            'keccak256_hex' => $new->keccak256_hex,
+            'storage_provider' => $new->storage_provider,
+            'storage_cid' => $new->storage_cid,
+            'storage_uri' => $new->storage_uri,
+            'encrypted' => (bool) $new->encrypted,
+            'lit_meta_json' => json_encode($new->lit_meta_json ?? null),
         ];
         return $this->query($sql, $params)->id;
     }

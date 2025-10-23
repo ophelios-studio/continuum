@@ -1,5 +1,6 @@
 <?php namespace Models\Legal\Entities;
 
+use stdClass;
 use Zephyrus\Core\Entity\Entity;
 
 final class EvidenceFile extends Entity
@@ -15,6 +16,7 @@ final class EvidenceFile extends Entity
     public ?string $storage_provider;
     public ?string $storage_cid;
     public ?string $storage_uri;
+    public ?stdClass $lit_meta_json;
     public bool $encrypted;
     public string $created_at;
 }

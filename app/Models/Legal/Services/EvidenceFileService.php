@@ -41,6 +41,7 @@ final readonly class EvidenceFileService
             'storage_cid' => $store['cid'] ?? null,
             'storage_uri' => $store['uri'] ?? null,
             'encrypted' => true,
+            'lit_meta_json' => $lit
         ];
         $fileId = $this->files->insert($new);
 

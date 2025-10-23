@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS legal.evidence_file
     storage_provider TEXT, -- 'local' | 'lighthouse' | ...
     storage_cid TEXT,
     storage_uri TEXT, -- ipfs://…
+    lit_meta_json JSONB,
     encrypted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
