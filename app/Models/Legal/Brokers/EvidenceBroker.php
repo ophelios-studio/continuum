@@ -40,6 +40,14 @@ final class EvidenceBroker extends Broker
         return $this->selectSingle('SELECT * FROM legal.evidence WHERE id = :id', ['id' => $id]);
     }
 
+    public function findByEvidenceHex(string $hex): ?stdClass
+    {
+        return $this->selectSingle(
+            "SELECT * FROM legal.evidence WHERE evidence_id_hex = :h",
+            ['h' => strtolower($hex)]
+        );
+    }
+
     public function listForCase(string $caseId, ?string $search = null, ?string $kind = null, ?string $status = null): array
     {
         $where  = ['e.case_id = :cid'];

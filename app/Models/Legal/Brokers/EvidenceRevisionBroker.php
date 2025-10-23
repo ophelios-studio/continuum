@@ -13,6 +13,14 @@ final class EvidenceRevisionBroker extends Broker
         );
     }
 
+    public function findById(int $revisionId): ?stdClass
+    {
+        return $this->selectSingle(
+            "SELECT * FROM legal.evidence_revision WHERE id = :id",
+            ['id' => $revisionId]
+        );
+    }
+
     public function findCurrentForEvidence(string $evidenceId): ?stdClass
     {
         return $this->selectSingle(
