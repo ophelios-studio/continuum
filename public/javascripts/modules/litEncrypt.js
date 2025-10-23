@@ -12,7 +12,7 @@ export async function encrypt({file, chain = 'sepolia', registry, evidenceIdHex,
     const client = new LitNodeClient({ litNetwork: LIT_NETWORK.Datil });
     await client.connect();
 
-    const conditions = [
+    const evmContractConditions = [
         {
             contractAddress: registry,
             chain,
@@ -25,13 +25,18 @@ export async function encrypt({file, chain = 'sepolia', registry, evidenceIdHex,
                 stateMutability: 'view',
                 type: 'function'
             },
-            returnValueTest: {
-                comparator: '=',
-                value: ':userAddress'
-            }
+            returnValueTest: { comparator: '=', value: ':userAddress' }
         }
     ];
-    const { ciphertext, dataToEncryptHash } = await encryptFile({conditions, chain, file}, client);
+
+    const { ciphertext, dataToEncryptHash } = await encryptFile(
+        {
+            evmContractConditions,
+            chain,
+            file
+        },
+        client
+    );
 
     const filename = (meta.filename || file.name || 'file') + '.enc';
     const mime = meta.mime || 'application/octet-stream';
@@ -44,12 +49,13 @@ export async function encrypt({file, chain = 'sepolia', registry, evidenceIdHex,
         size: ciphertext.size
     }));
 
-    form.append('lit', JSON.stringify({dataToEncryptHash, conditions, chain}));
-    const res = await fetch(uploadUrl, {
-        method: 'POST',
-        credentials: 'include',
-        body: form
-    });
+    form.append('lit', JSON.stringify({
+        dataToEncryptHash,
+        evmContractConditions,
+        chain
+    }));
+
+    const res = await fetch(uploadUrl, { method: 'POST', credentials: 'include', body: form });
     if (!res.ok) {
         const t = await res.text();
         throw new Error(t || 'Upload failed');
