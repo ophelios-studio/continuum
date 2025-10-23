@@ -1,5 +1,7 @@
 <?php namespace Models\Legal\Services;
 
+use Zephyrus\Network\Response;
+
 interface StorageDriver
 {
     /**
@@ -8,4 +10,6 @@ interface StorageDriver
      * @return array { provider: string, cid?: string, uri?: string, raw?: mixed }
      */
     public function storeFile(string $path, array $meta = []): array;
+
+    public function retrieveFile(string $cid, string $filename): Response;
 }

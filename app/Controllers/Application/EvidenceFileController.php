@@ -97,15 +97,12 @@ class EvidenceFileController extends AppController
     #[Get("/files/{fileId}/download")]
     public function downloadFile(string $caseId, string $evidenceId, string $fileId): Response
     {
-        $file = new EvidenceFileService()->findById($fileId);
+        $service = new EvidenceFileService();
+        $file = $service->findById($fileId);
         if (!$file || $file->evidence_id !== $evidenceId) {
             return $this->jsonError(404, 'File not found');
         }
-        $path = ROOT_DIR . '/storage/' . $file->storage_cid;
-        if (!is_readable($path)) {
-            return $this->jsonError(404, 'Cipher not available');
-        }
-        return $this->downloadInline($path, $file->filename);
+        return $service->retrieveFileResponse($file);
     }
 
     #[Get("/files/new")]
