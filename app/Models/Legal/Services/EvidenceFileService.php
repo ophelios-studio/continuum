@@ -9,7 +9,7 @@ use Models\Legal\Entities\EvidenceFile;
 final readonly class EvidenceFileService
 {
     public function __construct(
-        private StorageDriver $storage = new LocalStorage(),
+        private StorageDriver $storage = new LighthouseStorage(),
         private EvidenceFileBroker $files = new EvidenceFileBroker(),
         private EvidenceEventBroker $events = new EvidenceEventBroker()
     ) {}
