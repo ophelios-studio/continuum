@@ -14,6 +14,11 @@ final readonly class EvidenceFileService
         private EvidenceEventBroker $events = new EvidenceEventBroker()
     ) {}
 
+    public function findById(string $id): ?EvidenceFile
+    {
+        return EvidenceFile::build($this->files->findById($id));
+    }
+
     public function addEncryptedFile(string $evidenceId, Actor $actor, array $upload, array $lit): EvidenceFile
     {
         $tmp = $upload['tmp_path'];
