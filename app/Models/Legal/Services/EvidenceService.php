@@ -6,6 +6,7 @@ use Models\Legal\Brokers\EvidenceEventBroker;
 use Models\Legal\Brokers\EvidenceFileBroker;
 use Models\Legal\Brokers\CaseParticipantBroker;
 use Models\Legal\Brokers\LegalCaseBroker;
+use Models\Legal\ContentHash;
 use Models\Legal\Entities\Evidence;
 use Models\Legal\Entities\EvidenceEvent;
 use Models\Legal\Entities\EvidenceFile;
@@ -58,59 +59,21 @@ final readonly class EvidenceService
         return $ev;
     }
 
-    public function attachFile(string $evidenceId, string $actorWallet, array $meta): EvidenceFile
+    public function anchor(string $evidenceId, string $actorWallet, string $txHash): void
     {
         $e = $this->findById($evidenceId);
-        if (!$e) {
-            throw new \InvalidArgumentException('Evidence not found');
+        if (!$e) throw new \InvalidArgumentException('Evidence not found');
+        if ($e->status !== 'DRAFT') {
+            throw new \RuntimeException('Evidence must be DRAFT before anchoring');
         }
-        $new = (object) [
-            'evidence_id' => $evidenceId,
-            'filename' => $meta['filename'] ?? 'file',
-            'mime_type' => $meta['mime_type'] ?? null,
-            'byte_size' => $meta['byte_size'] ?? null,
-            'sha256_hex' => $meta['sha256_hex'] ?? null,
-            'keccak256_hex' => $meta['keccak256_hex'] ?? null,
-            'storage_provider' => $meta['storage_provider'] ?? null,
-            'storage_cid' => $meta['storage_cid'] ?? null,
-            'storage_uri' => $meta['storage_uri'] ?? null,
-            'encrypted' => $meta['encrypted'] ?? false,
-        ];
-        $fileId = $this->files->insert($new);
-        $this->events->append($evidenceId, $actorWallet, 'FILE_ATTACHED', [
-            'file_id' => $fileId,
-            'filename' => $new->filename
-        ]);
-        return EvidenceFile::build($this->files->findById($fileId));
-    }
-
-    public function removeFile(string $evidenceId, string $fileId, string $actorWallet): void
-    {
-        $this->files->deleteForEvidence($evidenceId, $fileId);
-        $this->events->append($evidenceId, $actorWallet, 'FILE_REMOVED', [
-            'file_id' => $fileId
-        ]);
-    }
-
-    public function markReady(string $evidenceId, string $actorWallet): void
-    {
-        $this->evidence->setStatus($evidenceId, 'READY');
-        $this->events->append($evidenceId, $actorWallet, 'EVIDENCE_READY');
-    }
-
-    public function persistAnchor(
-        string $evidenceId,
-        string $actorWallet,
-        string $evidenceIdHex,
-        string $contentHash,
-        ?string $mediaUri,
-        string $txHash
-    ): void {
-        $this->evidence->updateAnchorInfo($evidenceId, $evidenceIdHex, $contentHash, $mediaUri, $txHash);
-        $this->events->append($evidenceId, $actorWallet, 'ANCHORED', [
-            'evidence_id_hex' => strtolower($evidenceIdHex),
-            'content_hash' => strtolower($contentHash),
-            'media_uri' => $mediaUri,
+        $this->evidence->updateAnchorInfo(
+            $evidenceId,
+            $e->evidence_id_hex,
+            $e->content_hash,
+            $e->media_uri,
+            $txHash
+        );
+        $this->events->append($evidenceId, $actorWallet, 'EVIDENCE_ANCHORED', [
             'tx' => strtolower($txHash)
         ]);
     }
@@ -162,5 +125,45 @@ final readonly class EvidenceService
     public function listEvents(string $evidenceId): array
     {
         return EvidenceEvent::buildArray($this->events->listForEvidence($evidenceId));
+    }
+
+    public function computeContentHash(string $evidenceId): string
+    {
+        $e = $this->findById($evidenceId);
+        if (!$e) {
+            throw new \InvalidArgumentException('Evidence not found');
+        }
+        $files = $this->listFiles($evidenceId);
+        $manifest = $this->buildEvidenceManifest($e, $files);
+        return ContentHash::compute($manifest);
+    }
+
+    private function buildEvidenceManifest(Evidence $e, array $files): array
+    {
+        return [
+            'version' => 1,
+            'case_id' => $e->case_id,
+            'evidence_id' => $e->id,
+            'evidence_id_hex' => strtolower($e->evidence_id_hex ?? ''),
+            'title' => $e->title,
+            'kind' => $e->kind,
+            'jurisdiction' => $e->jurisdiction,
+            'description' => ($e->description ?? ''),
+            'submitter_address' => strtolower($e->submitter_address ?? ''),
+            'current_custodian' => strtolower($e->current_custodian ?? ''),
+            'files' => array_map(function (EvidenceFile $f) {
+                return [
+                    'filename' => (string)$f->filename,
+                    'mime' => (string)($f->mime_type ?? ''),
+                    'size' => (int)($f->byte_size ?? 0),
+                    'sha256' => strtolower($f->sha256_hex ?? ''),
+                    'keccak256' => strtolower($f->keccak256_hex ?? ''),
+                    'provider' => (string)($f->storage_provider ?? ''),
+                    'cid' => (string)($f->storage_cid ?? ''),
+                    'uri' => (string)($f->storage_uri ?? ''),
+                    'encrypted' => (bool)($f->encrypted ?? false),
+                ];
+            }, $files),
+        ];
     }
 }
