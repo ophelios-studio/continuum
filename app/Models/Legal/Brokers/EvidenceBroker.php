@@ -30,9 +30,7 @@ final class EvidenceBroker extends Broker
             'current_custodian' => strtolower($submitter->address),
             'status' => $new->status ?? 'DRAFT',
         ];
-        $id = $this->query($sql, $params)->id;
-        new EvidenceRevisionBroker()->insert($id, $submitter->address);
-        return $id;
+        return $this->query($sql, $params)->id;
     }
 
     public function findById(string $id): ?stdClass
