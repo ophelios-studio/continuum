@@ -58,7 +58,7 @@ security:
     key: !env ENCRYPTION_KEY
   csrf:
     enabled: true
-    exceptions: ['\/auth\/siwe.*']
+    exceptions: ['\/auth\/siwe.*', '\/cases\/.*\/evidences\/.*\/files']
   ids:
     enabled: true
-    impact_threshold: 50
+    impact_threshold: 100
