@@ -129,33 +129,29 @@
         const fileInput = document.getElementById('encFile');
         const btn = document.getElementById('btnUploadEnc');
         const statusEl = document.getElementById('status');
-
-        const uploadUrl = document.getElementById('dataUploadUrl').value;
         const redirectUrl = document.getElementById('dataRedirectUrl').value;
+        const uploadUrl  = document.getElementById('dataUploadUrl').value;
         const evidenceIdHex = document.getElementById('dataEvidenceIdHex').value;
-        const registry = document.getElementById('dataRegistry').value;
+        const registry   = document.getElementById('dataRegistry').value;
 
         const setStatus = (m) => { statusEl.textContent = m || ''; };
 
         btn?.addEventListener('click', async () => {
-            if (!fileInput?.files?.length) {
-                alert('You must add a file.');
-                return;
-            }
+            if (!fileInput?.files?.length) return alert('Pick a file first');
+
             btn.disabled = true;
             setStatus('Encrypting...');
 
             try {
                 const res = await encrypt({
                     file: fileInput.files[0],
-                    chain: 'sepolia',
                     registry,
                     evidenceIdHex,
                     uploadUrl,
-                    meta: { filename: fileInput.files[0].name }
+                    chain: 'sepolia'
                 });
+                setStatus('Upload complete');
                 console.log('Uploaded:', res);
-                setStatus('Upload complete.');
                 setTimeout(() => window.location.url = redirectUrl, 1000);
             } catch (e) {
                 console.error(e);
