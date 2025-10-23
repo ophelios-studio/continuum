@@ -8,13 +8,14 @@ final class EvidenceBroker extends Broker
 {
     public function insert(stdClass $new, Actor $submitter): string
     {
-        $sql = "INSERT INTO legal.evidence(case_id, title, kind, description, jurisdiction, external_uri, physical_tag, serial,
-             content_hash, media_uri, evidence_id_hex, anchor_tx, anchored_at,
-             submitter_address, current_custodian, pending_custodian, status)
-            VALUES(:case_id, :title, :kind, :description, :jurisdiction, :external_uri, :physical_tag, :serial,
-                 :content_hash, :media_uri, :evidence_id_hex, :anchor_tx, :anchored_at,
-                 :submitter_address, :current_custodian, :pending_custodian, :status)
-            RETURNING id";
+        $evidenceIdHex = $this->generateEvidenceIdHex();
+        $sql = "INSERT INTO legal.evidence(
+                    case_id, title, kind, description, jurisdiction, external_uri, physical_tag, serial,
+                    content_hash, media_uri, evidence_id_hex, anchor_tx, anchored_at,
+                    submitter_address, current_custodian, pending_custodian, status
+                )  VALUES(:case_id, :title, :kind, :description, :jurisdiction, :external_uri, :physical_tag, :serial, 
+                       NULL, NULL, :evidence_id_hex, NULL, NULL, :submitter_address, :current_custodian, NULL, :status)
+                RETURNING id";
         $params = [
             'case_id' => $new->case_id,
             'title' => $new->title,
@@ -24,54 +25,19 @@ final class EvidenceBroker extends Broker
             'external_uri' => $new->external_uri ?? null,
             'physical_tag' => $new->physical_tag ?? null,
             'serial' => $new->serial ?? null,
-            'content_hash' => $new->content_hash ?? null,
-            'media_uri' => $new->media_uri ?? null,
-            'evidence_id_hex' => $new->evidence_id_hex ?? null,
-            'anchor_tx' => null,
-            'anchored_at' => null,
-            'submitter_address' => $submitter->address,
-            'current_custodian' => $submitter->address,
-            'pending_custodian' => null,
+            'evidence_id_hex' => strtolower($evidenceIdHex),
+            'submitter_address' => strtolower($submitter->address),
+            'current_custodian' => strtolower($submitter->address),
             'status' => $new->status ?? 'DRAFT',
         ];
-
         $id = $this->query($sql, $params)->id;
-        $this->createRevision($id, $submitter->address);
+        new EvidenceRevisionBroker()->insert($id, $submitter->address);
         return $id;
-    }
-
-    public function createRevision(string $evidenceId, string $createdBy, ?string $contentHash = null, ?string $mediaUri = null): int
-    {
-        $zeroB32 = '0x' . str_repeat('0', 64);
-        $content = $contentHash ?: $zeroB32;
-        $sql = "
-            INSERT INTO legal.evidence_revision (evidence_id, rev_no, content_hash, media_uri, created_by)
-            SELECT
-                :evidence_id,
-                COALESCE(MAX(rev_no) + 1, 1) AS next_rev,
-                :content_hash,
-                :media_uri,
-                :created_by
-            FROM legal.evidence_revision
-            WHERE evidence_id = :evidence_id
-            RETURNING id";
-        $row = $this->query($sql, [
-            'evidence_id' => $evidenceId,
-            'content_hash' => $content,
-            'media_uri' => $mediaUri,
-            'created_by' => strtolower($createdBy),
-        ]);
-        return $row->id;
     }
 
     public function findById(string $id): ?stdClass
     {
         return $this->selectSingle('SELECT * FROM legal.evidence WHERE id = :id', ['id' => $id]);
-    }
-
-    public function findByEvidenceIdHex(string $evidenceIdHex): ?stdClass
-    {
-        return $this->selectSingle('SELECT * FROM legal.evidence WHERE evidence_id_hex = :h', ['h' => strtolower($evidenceIdHex)]);
     }
 
     public function listForCase(string $caseId, ?string $search = null, ?string $kind = null, ?string $status = null): array
@@ -94,27 +60,6 @@ final class EvidenceBroker extends Broker
 
         $sql = 'SELECT e.* FROM legal.evidence e WHERE ' . implode(' AND ', $where) . ' ORDER BY e.updated_at DESC';
         return $this->select($sql, $params);
-    }
-
-    public function updateAnchorInfo(string $id, string $evidenceIdHex, string $contentHash, ?string $mediaUri, string $txHash): void
-    {
-        $sql = "UPDATE legal.evidence
-                SET evidence_id_hex = :hex,
-                    content_hash = :ch,
-                    media_uri = :uri,
-                    anchor_tx = :tx,
-                    anchored_at = COALESCE(:anchored_at, NOW()),
-                    status = 'ANCHORED',
-                    updated_at = NOW(),
-                    anchored_at = NOW()
-                WHERE id = :id";
-        $this->query($sql, [
-            'id' => $id,
-            'hex' => strtolower($evidenceIdHex),
-            'ch' => strtolower($contentHash),
-            'uri' => $mediaUri,
-            'tx' => strtolower($txHash)
-        ]);
     }
 
     public function setPendingCustodian(string $id, string $toAddress): void
@@ -151,5 +96,10 @@ final class EvidenceBroker extends Broker
             'id' => $id,
             's'  => $status
         ]);
+    }
+
+    private function generateEvidenceIdHex(): string
+    {
+        return '0x' . bin2hex(random_bytes(32));
     }
 }
