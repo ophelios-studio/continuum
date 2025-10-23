@@ -59,7 +59,7 @@ final readonly class EvidenceService
         return $ev;
     }
 
-    public function anchor(string $evidenceId, string $actorWallet, string $txHash): void
+    public function anchor(string $evidenceId, string $actorWallet, string $txHash, string $contentHash): void
     {
         $e = $this->findById($evidenceId);
         if (!$e) throw new \InvalidArgumentException('Evidence not found');
@@ -69,7 +69,7 @@ final readonly class EvidenceService
         $this->evidence->updateAnchorInfo(
             $evidenceId,
             $e->evidence_id_hex,
-            $e->content_hash,
+            $contentHash,
             $e->media_uri,
             $txHash
         );
