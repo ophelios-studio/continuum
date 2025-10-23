@@ -62,6 +62,52 @@ class EvidenceFileController extends AppController
         return null;
     }
 
+    #[Get("/files/{fileId}/meta")]
+    public function meta(string $caseId, string $evidenceId, string $fileId): Response
+    {
+        $file = new EvidenceFileService()->findById($fileId);
+        if (!$file || $file->evidence_id !== $evidenceId) {
+            return $this->jsonError(404, 'File not found');
+        }
+
+        $lit = $file->lit_meta_json;
+        if (!isset($lit->dataToEncryptHash)) {
+            return $this->jsonError(400, 'Missing Lit v7 metadata');
+        }
+
+        return $this->json([
+            'filename' => $file->filename,
+            'mime_type' => $file->mime_type ?? 'application/octet-stream',
+            'byte_size' => $file->byte_size ?? 0,
+            'storage' => [
+                'provider' => $file->storage_provider,
+                'cid' => $file->storage_cid,
+                'uri' => $file->storage_uri,
+            ],
+            'lit' => [
+                'dataToEncryptHash' => $lit->dataToEncryptHash,
+                'evmContractConditions' => $lit->evmContractConditions ?? null,
+                'accessControlConditions' => $lit->accessControlConditions ?? null,
+                'unifiedAccessControlConditions' => $lit->unifiedAccessControlConditions ?? null,
+                'chain' => $lit->chain ?? 'sepolia',
+            ]
+        ]);
+    }
+
+    #[Get("/files/{fileId}/download")]
+    public function downloadFile(string $caseId, string $evidenceId, string $fileId): Response
+    {
+        $file = new EvidenceFileService()->findById($fileId);
+        if (!$file || $file->evidence_id !== $evidenceId) {
+            return $this->jsonError(404, 'File not found');
+        }
+        $path = ROOT_DIR . '/storage/' . $file->storage_cid;
+        if (!is_readable($path)) {
+            return $this->jsonError(404, 'Cipher not available');
+        }
+        return $this->downloadInline($path, $file->filename);
+    }
+
     #[Get("/files/new")]
     public function form(string $caseId, string $evidenceId): Response
     {
