@@ -1,21 +1,22 @@
 import { LitNodeClient } from 'https://esm.sh/@lit-protocol/lit-node-client@7';
 import { LIT_NETWORK } from 'https://esm.sh/@lit-protocol/constants@7';
 import { encryptFile } from 'https://esm.sh/@lit-protocol/encryption@7';
+import { checkAndSignAuthMessage } from 'https://esm.sh/@lit-protocol/auth-browser@7';
 
-export async function encrypt({file, chain = 'sepolia', registry, evidenceIdHex, uploadUrl, meta = {}}) {
+export async function encrypt({file, registry, evidenceIdHex, uploadUrl, chain = "sepolia", meta = {}}) {
     if (!file) throw new Error('No file provided');
-    if (!window.ethereum) throw new Error('Wallet provider not found');
     if (!registry) throw new Error('registry is required');
     if (!evidenceIdHex) throw new Error('evidenceIdHex is required');
     if (!uploadUrl) throw new Error('uploadUrl is required');
+    if (!window.ethereum) throw new Error('Wallet provider not found');
 
     const client = new LitNodeClient({ litNetwork: LIT_NETWORK.Datil });
     await client.connect();
-
+    const authSig = await checkAndSignAuthMessage({ chain: chain });
     const evmContractConditions = [
         {
             contractAddress: registry,
-            chain,
+            chain: chain,
             functionName: 'currentCustodian',
             functionParams: [evidenceIdHex],
             functionAbi: {
@@ -28,12 +29,12 @@ export async function encrypt({file, chain = 'sepolia', registry, evidenceIdHex,
             returnValueTest: { comparator: '=', value: ':userAddress' }
         }
     ];
-
     const { ciphertext, dataToEncryptHash } = await encryptFile(
         {
             evmContractConditions,
             chain,
-            file
+            file,
+            authSig
         },
         client
     );
