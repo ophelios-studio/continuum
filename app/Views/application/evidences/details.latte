@@ -1,6 +1,7 @@
 {layout ../../layouts/main.latte}
 
 {varType Models\Legal\Entities\Evidence $evidence}
+{varType Models\Legal\Entities\LegalCase $case}
 {varType array $files}
 {varType array $events}
 {varType string $evidence_registry_addr}
@@ -8,42 +9,45 @@
 {varType string $explorer_tx_base}
 
 {block content}
-<div class="page-header d-print-none">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <div class="d-flex align-items-center gap-2">
-          <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
-            {=substr($evidence->title ?? 'E', 0, 1)}
-          </span>
-          <div>
-            <h2 class="page-title mb-0">
-              {$evidence->title}
-            </h2>
-            <div class="text-secondary small">
-              Evidence #{$evidence->id} • Case #{$evidence->case_id}
-            </div>
-          </div>
+<div class="page-header">
+  <div class="row align-items-center mw-100">
+    <div class="col">
+      <div class="mb-1">
+        <ol class="breadcrumb" aria-label="breadcrumbs">
+          <li class="breadcrumb-item">
+            <a href="/cases">Cases</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="/cases/{$case->id}">{$case->ref_code}</a>
+          </li>
+          <li class="breadcrumb-item" aria-current="page">
+            <a href="/cases/{$case->id}">Evidences</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+            <a class="text-truncate" href="#">{$evidence->id}</a>
+          </li>
+        </ol>
+      </div>
+      <div >
+        <div class="page-title text-truncate">{$evidence->title}</div>
+        <div class="text-secondary small">
+            {if $evidence->physical_tag && $evidence->serial}
+                {$evidence->physical_tag} • {$evidence->serial}
+            {elseif $evidence->physical_tag}
+                {$evidence->physical_tag}
+            {elseif $evidence->serial}
+                {$evidence->serial}
+            {/if}
         </div>
       </div>
-      <div class="col-auto ms-auto d-print-none">
-        <a href="/cases/{$evidence->case_id}" class="btn btn-light">← Back to case</a>
-      </div>
     </div>
-  </div>
-</div>
-
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-cards">
-
-      <!-- Left: Overview -->
-      <div class="col-12 col-lg-8">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Overview</h3>
-            <div class="card-actions">
-              {php
+    <div class="col-auto">
+      <div class="btn-list">
+        <a href="#" class="btn d-none d-md-inline-flex">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
+          Add file
+        </a>
+        {php
                 $isAnchored = !empty($evidence->anchor_tx);
               }
               {if !$isAnchored}
@@ -51,19 +55,35 @@
                   id="btnAnchor"
                   class="btn btn-primary"
                   data-contract="{$evidence_registry_addr}"
-                  data-evidence-id="{$evidence->evidence_id_hex ?? ''}"
+                  data-evidence-id="{$evidence->id ?? ''}"
+                  data-evidence-id-hash="{$evidence->evidence_id_hex ?? ''}"
                   data-content-hash="{$evidence->content_hash ?? ''}"
                   data-media-uri="{$evidence->media_uri ?? ''}"
-                  data-evidence-int="{$evidence->id}"
+                  data-chain-id="{$chain_id}"
                 >
-                  Anchor on-chain
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
+                  Anchor
                 </button>
               {else}
                 <a href="{$explorer_tx_base}{$evidence->anchor_tx}" target="_blank" rel="noreferrer" class="btn btn-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
                   View transaction
                 </a>
               {/if}
-            </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+
+    <div class="row row-cards">
+
+      <!-- Left: Overview -->
+      <div class="col-12 col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Overview</h3>
           </div>
           <div class="card-body">
             {php
@@ -115,13 +135,6 @@
               </div>
 
               <div class="col-12">
-                <div class="text-secondary">Description</div>
-                <div class="mt-1">
-                  {if $evidence->description !== ''}{$evidence->description}{else}<span class="text-secondary">No description.</span>{/if}
-                </div>
-              </div>
-
-              <div class="col-12">
                 <div class="text-secondary">On-chain fingerprint</div>
                 <div class="mt-1 small">
                   <div>EvidenceId: <code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->evidence_id_hex ?? '—'}</code></div>
@@ -152,6 +165,15 @@
               </div>
             </div>
             <div id="anchorStatus" class="small text-muted mt-3"></div>
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-header">
+            <h3 class="card-title">Description</h3>
+          </div>
+          <div class="card-body">
+            {if $evidence->description !== ''}{$evidence->description}{else}<span class="text-secondary">No description.</span>{/if}
           </div>
         </div>
 
@@ -227,7 +249,6 @@
       </div>
 
     </div>
-  </div>
 </div>
 
 
