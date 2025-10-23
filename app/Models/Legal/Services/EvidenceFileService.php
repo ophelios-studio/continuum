@@ -5,6 +5,7 @@ use Models\Account\Entities\Actor;
 use Models\Legal\Brokers\EvidenceEventBroker;
 use Models\Legal\Brokers\EvidenceFileBroker;
 use Models\Legal\Entities\EvidenceFile;
+use Zephyrus\Network\Response;
 
 final readonly class EvidenceFileService
 {
@@ -17,6 +18,11 @@ final readonly class EvidenceFileService
     public function findById(string $id): ?EvidenceFile
     {
         return EvidenceFile::build($this->files->findById($id));
+    }
+
+    public function retrieveFileResponse(EvidenceFile $file): Response
+    {
+        return $this->storage->retrieveFile($file->storage_cid, $file->filename);
     }
 
     public function addEncryptedFile(string $evidenceId, Actor $actor, array $upload, array $lit): EvidenceFile
