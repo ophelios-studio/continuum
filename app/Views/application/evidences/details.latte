@@ -7,6 +7,31 @@
 {varType string $evidence_registry_addr}
 {varType int $chain_id}
 {varType string $explorer_tx_base}
+{var bool $isAnchored = !empty($evidence->anchor_tx)}
+
+{define "zf-modal-anchor", array $attributes}
+    {var string $identifier = $attributes['id'] ?? 'modal-anchor'}
+    {capture $innerLayout}
+        <div class="text-center">
+            <div id="anchorStatus" class="small text-muted mt-3 mb-3"></div>
+            <button class="btn btn-success"
+                  id="btnAnchor"
+                  data-contract="{$evidence_registry_addr}"
+                  data-evidence-id="{$evidence->id ?? ''}"
+                  data-evidence-id-hash="{$evidence->evidence_id_hex ?? ''}"
+                  data-content-hash="{$evidence->content_hash ?? ''}"
+                  data-media-uri="{$evidence->media_uri ?? ''}"
+                  data-chain-id="{$chain_id}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-location-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.512 17.023l-1.512 -3.023l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5l-4.45 12.324" /><path d="M15 19l2 2l4 -4" /></svg>
+                Confirm & sign
+            </button>
+        </div>
+    {/capture}
+    {do $attributes['illustration'] = "question"}
+    {do $attributes['text'] = "Do you want to anchor the evidence on-chain ?"}
+    {do $attributes['layout'] = $innerLayout}
+    {include "zf-modal-info", $identifier, $attributes}
+{/define}
 
 {block content}
 <div class="page-header">
@@ -43,24 +68,12 @@
     </div>
     <div class="col-auto">
       <div class="btn-list">
-        <a href="#" class="btn d-none d-md-inline-flex">
+        <a href="/cases/{$case->id}/evidences/{$evidence->id}/files/new" class="btn d-none d-md-inline-flex">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
           Add file
         </a>
-        {php
-                $isAnchored = !empty($evidence->anchor_tx);
-              }
               {if !$isAnchored}
-                <button
-                  id="btnAnchor"
-                  class="btn btn-primary"
-                  data-contract="{$evidence_registry_addr}"
-                  data-evidence-id="{$evidence->id ?? ''}"
-                  data-evidence-id-hash="{$evidence->evidence_id_hex ?? ''}"
-                  data-content-hash="{$evidence->content_hash ?? ''}"
-                  data-media-uri="{$evidence->media_uri ?? ''}"
-                  data-chain-id="{$chain_id}"
-                >
+                <button id="btnAnchor" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-anchor">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
                   Anchor
                 </button>
@@ -164,7 +177,6 @@
                 <div>Updated: {$evidence->updated_at|datetime}</div>
               </div>
             </div>
-            <div id="anchorStatus" class="small text-muted mt-3"></div>
           </div>
         </div>
 
@@ -177,8 +189,49 @@
           </div>
         </div>
 
-        <!-- Activity -->
         <div class="card mt-3">
+          <div class="card-header">
+            <h3 class="card-title">Files</h3>
+          </div>
+              <div class="card-body">
+                {if count($files) === 0}
+                  <div class="text-secondary">No files attached.</div>
+                {else}
+                  <div class="list-group list-group-flush" id="evidence-files">
+                    {foreach $files as $f}
+                      <div class="list-group-item d-flex align-items-center gap-3">
+                        <div class="flex-fill">
+                          <div class="fw-bold text-truncate">{$f->filename}</div>
+                          <div class="small text-secondary">
+                            {format('filesize', $f->byte_size)} • {$f->mime_type}
+                          </div>
+                          <div class="small text-muted mt-1" id="status-file-{$f->id}"></div>
+                        </div>
+
+                        {if $f->encrypted}
+                          <button
+                            class="btn btn-outline-primary btn-decrypt"
+                            data-meta-url="/cases/{$case->id}/evidences/{$evidence->id}/files/{$f->id}/meta"
+                            data-download-url="/cases/{$case->id}/evidences/{$evidence->id}/files/{$f->id}/download"
+                            data-status-id="status-file-{$f->id}">
+                            Decrypt & Download
+                          </button>
+                        {else}
+                          <a
+                            class="btn btn-outline-secondary"
+                            href="/cases/{$case->id}/evidences/{$evidence->id}/files/{$f->id}/download">
+                            Download
+                          </a>
+                        {/if}
+                      </div>
+                    {/foreach}
+                  </div>
+                {/if}
+              </div>
+            </div>
+      </div>
+      <div class="col-12 col-lg-4">
+           <div class="card">
           <div class="card-header">
             <h3 class="card-title">Activity</h3>
           </div>
@@ -212,44 +265,48 @@
         </div>
       </div>
 
-      <!-- Right: Files -->
-      <div class="col-12 col-lg-4">
-        <div class="card">
-          <div class="card-status-top bg-teal"></div>
-          <div class="card-header">
-            <h3 class="card-title">Files</h3>
-          </div>
-          <div class="card-body">
-            {if count($files) === 0}
-              <div class="text-secondary">No files attached.</div>
-            {else}
-              <div class="list-group list-group-flush">
-                {foreach $files as $f}
-                  <div class="list-group-item">
-                    <div class="d-flex align-items-center">
-                      <div class="me-2">
-                        <span class="avatar avatar-sm bg-blue-lt">
-                          {=strtoupper(substr(($f->mime_type ?? 'file'),0,1))}
-                        </span>
-                      </div>
-                      <div class="flex-fill">
-                        <div class="fw-bold text-truncate">{$f->filename}</div>
-                        <div class="small text-secondary">
-                          {if $f->byte_size}{=number($f->byte_size)} bytes • {/if}
-                          {if $f->mime_type}{$f->mime_type}{else}—{/if}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                {/foreach}
-              </div>
-            {/if}
-          </div>
-        </div>
-      </div>
-
     </div>
 </div>
 
+<script type="module" nonce="{nonce()}" n:syntax="off">
+  import { decryptEvidenceFile, saveBlob } from '/javascripts/modules/litDecrypt.js';
 
+  const list = document.getElementById('evidence-files');
+
+  function setRowStatus(btn, msg) {
+    const id = btn.dataset.statusId;
+    const el = id ? document.getElementById(id) : null;
+    if (el) el.textContent = msg || '';
+  }
+
+  list?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.btn-decrypt');
+    if (!btn) return;
+
+    e.preventDefault();
+    if (btn.disabled) return;
+
+    const metaUrl = btn.dataset.metaUrl;
+    const downloadUrl = btn.dataset.downloadUrl;
+
+    try {
+      btn.disabled = true;
+      setRowStatus(btn, 'Contacting Lit…');
+      const { blob, filename } = await decryptEvidenceFile({ metaUrl, downloadUrl });
+      setRowStatus(btn, 'Decrypted ✓ — downloading…');
+      saveBlob({ blob, filename });
+      setRowStatus(btn, '');
+    } catch (err) {
+      console.error(err);
+      setRowStatus(btn, err?.shortMessage || err?.message || 'Decrypt failed');
+      btn.disabled = false;
+    }
+  });
+</script>
+{/block}
+
+{block modals}
+    {if !$isAnchored}
+        {include "zf-modal-anchor"}
+    {/if}
 {/block}
