@@ -8,6 +8,6 @@ class DashboardController extends AppController
     #[Get("/")]
     public function index(): Response
     {
-        return $this->render("application/dashboard");
+        return $this->redirect("/cases");
     }
 }
