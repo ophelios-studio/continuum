@@ -50,9 +50,10 @@
         <div class="row row-deck row-cards">
             <div class="col-12 col-lg-8">
                 <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Upload a secure file</h3>
+                    </div>
                     <div class="card-body">
-                        <h3>Upload a secure file</h3>
-                        <p class="text-muted">Choose a file on your device you wish to attach to the evidence {$evidence->id}. The file will be encrypted <strong>locally</strong> in your browser (AES-GCM) and uploaded as ciphertext.</p>
                         <div class="mb-3">
                             <label class="form-label required">File</label>
                             <input type="file" class="form-control" id="encFile" required>
@@ -63,23 +64,14 @@
                         </div>
 
                         <div class="alert alert-info">
-                            <div class="d-flex">
-                                <div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z"/><path d="M12 9v2m0 4v.01"/><path d="M5.07 19h13.86A2.07 2.07 0 0 0 21 16.93L13.93 5.07a2.07 2.07 0 0 0-3.86 0L3 16.93A2.07 2.07 0 0 0 5.07 19z"/></svg>
-                                </div>
+                            <div>
                                 <div>
                                     <h4 class="alert-title">Dynamic, contract-based access</h4>
                                     <div class="text-secondary">
                                         Decryption requires that <code>EvidenceRegistry.currentCustodian(evidenceId)</code> equals the requester’s wallet at the time of decryption. If custody changes on-chain, access updates automatically.
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="alert alert-secondary">
-                            <div class="d-flex">
-                                <div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke="none" d="M0 0h24v24H0z"/><path d="M12 9v2m0 4v.01"/><path d="M5.07 19h13.86A2.07 2.07 0 0 0 21 16.93L13.93 5.07a2.07 2.07 0 0 0-3.86 0L3 16.93A2.07 2.07 0 0 0 5.07 19z"/></svg>
-                                </div>
+                                <hr>
                                 <div>
                                     <h4 class="alert-title">Privacy reminder</h4>
                                     <div class="text-secondary">
@@ -87,6 +79,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
 
                         <div id="status" class="small text-muted"></div>
@@ -109,6 +102,7 @@
                     <div class="card-status-top bg-teal"></div>
                     <div class="card-body">
                         <h3 class="card-title">How it works</h3>
+                        <p class="text-muted">Choose a file on your device you wish to attach to the evidence {$evidence->id}. The file will be encrypted <strong>locally</strong> in your browser (AES-GCM) and uploaded as ciphertext.</p>
                         <ol class="text-secondary">
                             <li>Your wallet signs a short Lit auth message.</li>
                             <li>The file is encrypted locally (AES-GCM).</li>
@@ -152,7 +146,7 @@
                 });
                 setStatus('Upload complete');
                 console.log('Uploaded:', res);
-                setTimeout(() => window.location.url = redirectUrl, 1000);
+                setTimeout(() => window.location.replace(redirectUrl), 1000);
             } catch (e) {
                 console.error(e);
                 setStatus(e?.message || 'Upload failed');

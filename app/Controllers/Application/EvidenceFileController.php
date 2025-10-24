@@ -182,7 +182,7 @@ class EvidenceFileController extends AppController
                 'encrypted'  => $file->encrypted,
                 'created_at' => $file->created_at
             ];
-            Flash::success("File uploaded successfully.");
+            Flash::success("The file has been encrypted and uploaded successfully 🎉. You cannot download the file until the evidence is anchored on-chain.");
             return $this->json($out);
         } catch (Throwable $e) {
             return $this->jsonError(400, $e->getMessage());
