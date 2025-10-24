@@ -45,9 +45,6 @@
           <li class="breadcrumb-item">
             <a href="/cases/{$case->id}">{$case->ref_code}</a>
           </li>
-          <li class="breadcrumb-item" aria-current="page">
-            <a href="/cases/{$case->id}">Evidences</a>
-          </li>
           <li class="breadcrumb-item active" aria-current="page">
             <a class="text-truncate" href="#">{$evidence->id}</a>
           </li>
@@ -72,17 +69,12 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
           Add file
         </a>
-              {if !$isAnchored}
-                <button id="btnAnchor" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-anchor">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
-                  Anchor
-                </button>
-              {else}
-                <a href="{$explorer_tx_base}{$evidence->anchor_tx}" target="_blank" rel="noreferrer" class="btn btn-outline">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
-                  View transaction
-                </a>
-              {/if}
+        {if $evidence->status !== 'ANCHORED'}
+            <button id="btn-anchor" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
+              Anchor
+            </button>
+          {/if}
       </div>
     </div>
   </div>
@@ -267,6 +259,30 @@
 
     </div>
 </div>
+
+<script type="module" n:syntax="off" nonce="{nonce()}">
+  import { anchorEvidence } from '/javascripts/modules/anchorEvidence.js';
+
+  const btn = document.getElementById('btn-anchor');
+  const statusEl = document.getElementById('anchor-status');
+  const setStatus = (m) => { statusEl.textContent = m || ''; };
+
+  btn?.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      await anchorEvidence({
+        prepareUrl: '/cases/{$case->id}/evidences/{$evidence->id}/anchor/prepare',
+        confirmUrl: '/cases/{$case->id}/evidences/{$evidence->id}/anchor/confirm',
+        onStatus: setStatus
+      });
+      setTimeout(() => location.href = '/cases/{$case->id}/evidences/{$evidence->id}', 1000);
+    } catch (e) {
+      console.error(e);
+      setStatus(e?.message || 'Failed to anchor');
+      btn.disabled = false;
+    }
+  });
+</script>
 
 <script type="module" nonce="{nonce()}" n:syntax="off">
   import { decryptEvidenceFile, saveBlob } from '/javascripts/modules/litDecrypt.js';
