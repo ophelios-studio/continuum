@@ -1,8 +1,7 @@
 import { LitNodeClient } from 'https://esm.sh/@lit-protocol/lit-node-client@7';
 import { LIT_NETWORK } from 'https://esm.sh/@lit-protocol/constants@7';
 import { decryptToFile } from 'https://esm.sh/@lit-protocol/encryption@7';
-import { checkAndSignAuthMessage } from 'https://esm.sh/@lit-protocol/auth-browser@7';
-import { getAuthSig } from "./wallet.js"
+import { getAuthSigSiwe } from "./wallet.js"
 
 export async function decryptEvidenceFile({ metaUrl, downloadUrl }) {
     if (!metaUrl || !downloadUrl) throw new Error('metaUrl and downloadUrl are required');
@@ -34,7 +33,7 @@ export async function decryptEvidenceFile({ metaUrl, downloadUrl }) {
     const client = new LitNodeClient({ litNetwork: LIT_NETWORK.Datil });
     await client.connect();
 
-    const authSig = await getAuthSig({ chain });
+    const authSig = await getAuthSigSiwe({ chain });
     console.log(authSig);
 
     const acc =

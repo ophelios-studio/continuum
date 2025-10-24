@@ -1,8 +1,7 @@
 import { LitNodeClient } from 'https://esm.sh/@lit-protocol/lit-node-client@7';
 import { LIT_NETWORK } from 'https://esm.sh/@lit-protocol/constants@7';
 import { encryptFile } from 'https://esm.sh/@lit-protocol/encryption@7';
-import { checkAndSignAuthMessage } from 'https://esm.sh/@lit-protocol/auth-browser@7';
-import { getAuthSig } from "./wallet.js"
+import { getAuthSigSiwe } from "./wallet.js"
 
 export async function encrypt({file, registry, evidenceIdHex, uploadUrl, chain = "sepolia", meta = {}}) {
     if (!file) throw new Error('No file provided');
@@ -13,7 +12,7 @@ export async function encrypt({file, registry, evidenceIdHex, uploadUrl, chain =
 
     const client = new LitNodeClient({ litNetwork: LIT_NETWORK.Datil });
     await client.connect();
-    const authSig = await getAuthSig({ chain });
+    const authSig = await getAuthSigSiwe({ chain });
     const evmContractConditions = [
         {
             contractAddress: registry,
@@ -27,7 +26,11 @@ export async function encrypt({file, registry, evidenceIdHex, uploadUrl, chain =
                 stateMutability: 'view',
                 type: 'function'
             },
-            returnValueTest: { comparator: '=', value: ':userAddress' }
+            returnValueTest: {
+                "key": "",
+                comparator: '=',
+                value: ':userAddress'
+            }
         }
     ];
     const { ciphertext, dataToEncryptHash } = await encryptFile(
