@@ -12,9 +12,29 @@
 {define "zf-modal-anchor", array $attributes}
     {var string $identifier = $attributes['id'] ?? 'modal-anchor'}
     {capture $innerLayout}
-        <div class="text-center">
+        <div>
+            <div class="alert alert-warning" role="alert">
+                <div>
+               <strong>After anchoring, you will be able to:</strong>
+
+              <ul class="mb-3">
+              <li><strong>Decrypt and download</strong> attached files (as current custodian)</li>
+              <li><strong>Prove authenticity</strong> via the on-chain hash</li>
+              <li><strong>Transfer custody</strong> to another authorized wallet</li>
+              <li><strong>Reference the transaction</strong> in court or any dispute</li>
+            </ul>
+            <strong>Important:</strong>
+              <ul class="mb-0">
+                <li>The evidence will be <strong>locked</strong> — you will no longer be able to edit its content or replace files.</li>
+                <li>The transaction requires a <strong>gas fee</strong> and is <strong>public and irreversible</strong> once confirmed.</li>
+              </ul>
+            </div>
+            </div>
+
+                <div class="text-center">
+            <p class="mb-0">Do you wish to proceed with anchoring this evidence on-chain?</p>
             <div id="anchorStatus" class="small text-muted mt-3 mb-3"></div>
-            <button class="btn btn-success"
+            <button class="btn btn-warning"
                   id="btnAnchor"
                   data-contract="{$evidence_registry_addr}"
                   data-evidence-id="{$evidence->id ?? ''}"
@@ -25,11 +45,14 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-location-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.512 17.023l-1.512 -3.023l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5l-4.45 12.324" /><path d="M15 19l2 2l4 -4" /></svg>
                 Confirm & sign
             </button>
+</div>
+
         </div>
     {/capture}
-    {do $attributes['illustration'] = "question"}
-    {do $attributes['text'] = "Do you want to anchor the evidence on-chain ?"}
+    {do $attributes['illustration'] = "confirmation"}
+    {do $attributes['text'] = "Anchoring this evidence will publish a permanent cryptographic fingerprint to the blockchain. Once anchored, the record becomes final and tamper-proof."}
     {do $attributes['layout'] = $innerLayout}
+    {do $attributes['illustration-theme'] = "warning"}
     {include "zf-modal-info", $identifier, $attributes}
 {/define}
 
@@ -64,7 +87,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
               Add file
             </a>
-            <button id="btn-anchor" class="btn">
+            <button class="btn" data-bs-toggle="modal" data-bs-target="#modal-anchor">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
               Anchor
             </button>
@@ -334,7 +357,7 @@
 {/block}
 
 {block modals}
-    {if !$isAnchored}
+    {if $evidence->status !== 'ANCHORED'}
         {include "zf-modal-anchor"}
     {/if}
 {/block}
