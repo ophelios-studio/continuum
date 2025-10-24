@@ -1,20 +1,20 @@
 <?php namespace Models\Legal\Brokers;
 
 use Models\Core\Broker;
+use stdClass;
 
 final class CaseParticipantBroker extends Broker
 {
-    public function add(string $caseId, string $address, string $role, ?int $orgId = null, bool $accepted = true): string
+    public function add(string $caseId, stdClass $new): string
     {
         $sql = "INSERT INTO legal.case_participant (case_id, address, role, org_id, invited_at, accepted_at)
-                VALUES (:case_id, :address, :role, :org_id, NOW(), :accepted_at)
+                VALUES (:case_id, :address, :role, :org_id, NOW(), NOW())
                 RETURNING id";
         $params = [
             'case_id' => $caseId,
-            'address' => strtolower($address),
-            'role' => $role,
-            'org_id' => $orgId,
-            'accepted_at' => $accepted ? date('c') : null,
+            'address' => strtolower($new->address),
+            'role' => $new->role,
+            'org_id' => null
         ];
         return $this->query($sql, $params)->id;
     }

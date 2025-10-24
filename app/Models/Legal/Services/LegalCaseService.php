@@ -8,6 +8,7 @@ use Models\Legal\Entities\CaseEvent;
 use Models\Legal\Entities\CaseParticipant;
 use Models\Legal\Entities\LegalCase;
 use Models\Legal\Validators\LegalCaseValidator;
+use Models\Legal\Validators\MemberValidator;
 use Zephyrus\Application\Form;
 
 final readonly class LegalCaseService
@@ -63,10 +64,11 @@ final readonly class LegalCaseService
         return CaseEvent::buildArray($this->events->list($caseId, $limit, $offset));
     }
 
-    public function addMember(int $caseId, string $owner, string $address, string $role, ?int $orgId = null): void
+    public function addMember(string $caseId, Actor $owner, Form $form): void
     {
-        $this->participants->add($caseId, $address, $role, $orgId, true);
-        $this->events->add($caseId, $owner, 'MEMBER_ADDED', ['address' => $address, 'role' => $role]);
+        MemberValidator::assertInsert($caseId, $form);
+        $this->participants->add($caseId, $form->buildObject());
+        $this->events->add($caseId, $owner->address, 'MEMBER_ADDED', ['address' => $form->getValue('address'), 'role' => $form->getValue('role')]);
     }
 
     public function changeMemberRole(int $caseId, string $owner, string $address, string $role): void
