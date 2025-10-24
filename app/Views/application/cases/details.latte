@@ -7,7 +7,6 @@
 
 {block content}
 <div class="page-header">
-
   <div class="row align-items-center mw-100">
     <div class="col">
       <div class="mb-1">
@@ -41,6 +40,7 @@
       </div>
     </div>
   </div>
+  <div n:ifcontent class="mt-5">{include "zf-flash"}</div>
 </div>
 
 <div class="page-body">
@@ -129,7 +129,6 @@
                     <th>Wallet</th>
                     <th>Role</th>
                     <th>Added</th>
-                    <th class="w-1"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -145,35 +144,14 @@
                         {/if}
                       </td>
                       <td>
-                        {if $isOwner && strtolower($p->address) !== $me}
-                          <form action="/cases/{$case->id}/members/role" method="post" class="d-inline-flex align-items-center gap-2">
-                            <input type="hidden" name="address" value="{$p->address}">
-                            <select name="role" class="form-select form-select-sm">
-                              <option value="OWNER"  {if $p->role === 'OWNER'}selected{/if}>OWNER</option>
-                              <option value="EDITOR" {if $p->role === 'EDITOR'}selected{/if}>EDITOR</option>
-                              <option value="VIEWER" {if $p->role === 'VIEWER'}selected{/if}>VIEWER</option>
-                            </select>
-                            <button class="btn btn-outline btn-sm">Save</button>
-                          </form>
-                        {else}
+
                           <span class="badge bg-azure-lt">{$p->role}</span>
-                        {/if}
+
                       </td>
                       <td>
                         <span class="text-secondary small">
                           {$p->invited_at|datetime}
                         </span>
-                      </td>
-                      <td class="text-end">
-                        {if $isOwner && strtolower($p->address) !== $me}
-                          <form action="/cases/{$case->id}/members/remove" method="post">
-                            <input type="hidden" name="address" value="{$p->address}">
-                            <button class="btn btn-link text-danger p-0"
-                                    onclick="return confirm('Remove this member?');">
-                              Remove
-                            </button>
-                          </form>
-                        {/if}
                       </td>
                     </tr>
                   {/foreach}

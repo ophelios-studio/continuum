@@ -1,0 +1,12 @@
+{
+  "cases": {
+    "errors": {
+      "address_required": "The <b>wallet address</b> must not be empty.",
+      "address_invalid": "The <b>wallet address</b> is invalid. Make sure to use a valid Ethereum address (EIP-55) starting with 0x.",
+      "role_required": "The <b>role</b> must not be empty.",
+      "role_invalid": "The selected <b>role</b> is invalid.",
+      "affirm_required": "You must confirm you have the right to add participant to this <b>case</b>.",
+      "address_already_member": "The specified <b>wallet address</b> is already a member of this <b>case</b>."
+    }
+  }
+}

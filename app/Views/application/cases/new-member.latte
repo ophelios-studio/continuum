@@ -1,0 +1,115 @@
+{layout ../../layouts/main.latte}
+
+{varType Models\Legal\Entities\LegalCase $case}
+{varType array $roles}
+
+{block content}
+    <div class="page-header d-print-none">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="mb-1">
+                    <ol class="breadcrumb" aria-label="breadcrumbs">
+                        <li class="breadcrumb-item">
+                            <a href="/cases">Cases</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="/cases/{$case->id}">{$case->ref_code}</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <a href="#">New member</a>
+                        </li>
+                    </ol>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div>
+                        <h2 class="page-title mb-0">Add member</h2>
+                        <div class="text-secondary small">
+                            Case ID {$case->id} • Jurisdiction <code>{$case->jurisdiction}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a class="btn" href="/cases/{$case->id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                        <path d="M15 6l-6 6l6 6"></path>
+                    </svg>
+                    Back to case</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+        <div class="row row-cards">
+            <!-- Main form -->
+            <div class="col-12 col-lg-8">
+                <form action="/cases/{$case->id}/members" method="post" class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Member details</h3>
+                    </div>
+                    <div class="card-body">
+                        {include "zf-flash"}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                {include "zf-field-text", "Wallet address", "address", [
+                                    placeholder: "e.g. 0x846a07aa7577440174Fe89B82130D836389b1b81",
+                                    required: true
+                                ]}
+                            </div>
+                            <div class="col-md-6">
+                                {include "zf-field-select", "Role", "role", $roles, [
+                                    required: true,
+                                    native: true
+                                ]}
+                            </div>
+                            <div class="col-12">
+                                {include "zf-field-checkbox", "I confirm I have the right to add participants for this case.", "affirm"}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center">
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Save member
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-12 col-lg-4 mt-3">
+                <div>
+                    <div class="card">
+                        <div class="card-status-top bg-indigo"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">About Case Roles</h3>
+
+                            <p class="text-secondary mb-2">
+                                Each participant is granted a specific permission level. These roles control what
+                                they can do inside the case:
+                            </p>
+
+                            <ul class="text-secondary">
+                                <li>
+                                    <strong>Owner</strong><br>
+                                    Full control. Can add/remove members, manage evidence, transfer custody, and anchor on-chain.
+                                </li>
+                                <li class="mt-2">
+                                    <strong>Editor</strong><br>
+                                    Can submit evidence, upload files, and participate in custody. Cannot manage members or delete the case.
+                                </li>
+                                <li class="mt-2">
+                                    <strong>Viewer</strong><br>
+                                    Read-only access. Can view details, history, and anchored fingerprints but cannot modify anything.
+                                </li>
+                            </ul>
+
+                            <p class="text-secondary mt-3 mb-0">
+                                You can update or revoke these roles later if needed.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{/block}
