@@ -6,128 +6,135 @@
 
 {block content}
     <div class="page-header d-print-none">
-        <div class="container-xl">
-            <div class="row g-2 align-items-center">
-                <div class="col">
-                    <div class="d-flex align-items-center gap-2">
-          <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
-            {=substr($case->ref_code ?? 'C', 0, 1)}
-          </span>
-                        <div>
-                            <h2 class="page-title mb-0">
-                                Add Evidence — {$case->ref_code} · {$case->title}
-                            </h2>
-                            <div class="text-secondary small">
-                                Case ID {$case->id} • Jurisdiction <code>{$case->jurisdiction}</code>
-                            </div>
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="mb-1">
+                    <ol class="breadcrumb" aria-label="breadcrumbs">
+                        <li class="breadcrumb-item">
+                            <a href="/cases">Cases</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="/cases/{$case->id}">{$case->ref_code}</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <a href="#">New evidence</a>
+                        </li>
+                    </ol>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div>
+                        <h2 class="page-title mb-0">Create evidence</h2>
+                        <div class="text-secondary small">
+                            Case ID {$case->id} • Jurisdiction <code>{$case->jurisdiction}</code>
                         </div>
                     </div>
                 </div>
-                <div class="col-auto ms-auto d-print-none">
-                    <a href="/cases/{$case->id}" class="btn btn-light">← Back to case</a>
-                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a class="btn" href="/cases/{$case->id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                        <path d="M15 6l-6 6l6 6"></path>
+                    </svg>
+                    Back to case</a>
             </div>
         </div>
     </div>
 
     <div class="page-body">
-        <div class="container-xl">
-            <div class="row row-cards">
-                <!-- Main form -->
-                <div class="col-12 col-lg-8">
-                    <form action="/cases/{$case->id}/evidences" method="post" class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Evidence details</h3>
+        <div class="row row-cards">
+            <!-- Main form -->
+            <div class="col-12 col-lg-8">
+                <form action="/cases/{$case->id}/evidences" method="post" class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Evidence details</h3>
+                    </div>
+                    <div class="card-body">
+                        {include "zf-flash"}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                {include "zf-field-text", "Title", "title", [
+                                    placeholder: "e.g. iPhone 14 Pro logical dump (Cellebrite)",
+                                    required: true
+                                ]}
+                            </div>
+                            <div class="col-md-6">
+                                {include "zf-field-select", "Kind", "kind", $kinds, [
+                                    required: true,
+                                    native: true
+                                ]}
+                            </div>
+                            <div class="col-md-6">
+                                {include "zf-field-text", "Jurisdiction", "jurisdiction", [
+                                    placeholder: "e.g. CA-QC",
+                                    required: true,
+                                    default: $default_jurisdiction ?? $case->jurisdiction
+                                ]}
+                            </div>
+                            <div class="col-12">
+                                {include "zf-field-textarea", "Description / Notes", "description", [
+                                    placeholder: "Acquisition method, device serial, context, chain linkage, etc. Avoid sensitive plaintext—files will be encrypted later with Lit.",
+                                    rows: "4"
+                                ]}
+                            </div>
+                            <div class="col-12">
+                                {include "zf-field-text", "External reference", "external_uri", [
+                                    placeholder: "https://... (ticket, cloud folder, lab ref)",
+                                    hint: "Not stored on-chain; useful for off-chain coordination."
+                                ]}
+                            </div>
+
+                            <div class="col-md-6">
+                                {include "zf-field-text", "Physical label / tag", "physical_tag", [
+                                    placeholder: "e.g. TAG-00142"
+                                ]}
+                            </div>
+                            <div class="col-md-6">
+                                {include "zf-field-text", "Serial / identifier", "serial", [
+                                    placeholder: "e.g. G6TZ… / IMEI / S/N"
+                                ]}
+                            </div>
+                            <div class="col-12">
+                                {include "zf-field-checkbox", "I confirm I have the right to submit this evidence for this case.", "affirm"}
+                            </div>
                         </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center">
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Save evidence
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-12 col-lg-4 mt-3">
+                <div>
+                    <div class="card">
+                        <div class="card-status-top bg-teal"></div>
                         <div class="card-body">
-                            {include "zf-flash"}
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    {include "zf-field-text", "Title", "title", [
-                                        placeholder: "e.g. iPhone 14 Pro logical dump (Cellebrite)",
-                                        required: true,
-                                        hint: "Human-friendly label shown in lists and timelines."
-                                    ]}
-                                </div>
-                                <div class="col-md-6">
-                                    {include "zf-field-select", "Kind", "kind", $kinds, [
-                                        required: true,
-                                        native: true
-                                    ]}
-                                </div>
-                                <div class="col-md-6">
-                                    {include "zf-field-text", "Jurisdiction", "jurisdiction", [
-                                        placeholder: "e.g. CA-QC",
-                                        required: true,
-                                        default: $default_jurisdiction ?? $case->jurisdiction
-                                    ]}
-                                </div>
-                                <div class="col-12">
-                                    {include "zf-field-textarea", "Description / Notes", "description", [
-                                        placeholder: "Acquisition method, device serial, context, chain linkage, etc. Avoid sensitive plaintext—files will be encrypted later with Lit.",
-                                        rows: "4"
-                                    ]}
-                                </div>
-                                <div class="col-12">
-                                    {include "zf-field-text", "External reference", "external_uri", [
-                                        placeholder: "https://... (ticket, cloud folder, lab ref)",
-                                        hint: "Not stored on-chain; useful for off-chain coordination."
-                                    ]}
-                                </div>
-
-                                <div class="col-md-6">
-                                    {include "zf-field-text", "Physical label / tag", "physical_tag", [
-                                        placeholder: "e.g. TAG-00142"
-                                    ]}
-                                </div>
-                                <div class="col-md-6">
-                                    {include "zf-field-text", "Serial / identifier", "serial", [
-                                        placeholder: "e.g. G6TZ… / IMEI / S/N"
-                                    ]}
-                                </div>
-                                <div class="col-12">
-                                    {include "zf-field-checkbox", "I confirm I have the right to submit this evidence for this case.", "affirm"}
-                                </div>
-                            </div>
+                            <h3 class="card-title">What happens next?</h3>
+                            <ol class="text-secondary">
+                                <li>This record is saved in the app (off-chain catalog).</li>
+                                <li>You'll be able to <strong>anchor</strong> the evidence on-chain (creates the public fingerprint).</li>
+                                <li>Files will be <strong>encrypted</strong> with Lit. Only the current custodian can decrypt.</li>
+                                <li>You can then <strong>transfer custody</strong> to another wallet (who must accept).</li>
+                            </ol>
                         </div>
-                        <div class="card-footer d-flex align-items-center">
-                            <button type="submit" class="btn btn-primary ms-auto">
-                                Save evidence
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
 
-                <!-- Sidebar -->
-                <div class="col-12 col-lg-4 mt-3">
-                    <div>
-                        <div class="card">
-                            <div class="card-status-top bg-teal"></div>
-                            <div class="card-body">
-                                <h3 class="card-title">What happens next?</h3>
-                                <ol class="text-secondary">
-                                    <li>This record is saved in the app (off-chain catalog).</li>
-                                    <li>You’ll be able to <strong>anchor</strong> the evidence on-chain (creates the public fingerprint).</li>
-                                    <li>Files will be <strong>encrypted</strong> with Lit. Only the current custodian (and the original submitter) can decrypt.</li>
-                                    <li>You can then <strong>transfer custody</strong> to another wallet (who must accept).</li>
-                                </ol>
-                            </div>
-                        </div>
-
-                        <div class="card mt-3">
-                            <div class="card-status-top bg-blue"></div>
-                            <div class="card-body">
-                                <h3 class="card-title">Good practice</h3>
-                                <ul class="text-secondary mb-0">
-                                    <li>Prefer canonical bundles (e.g., ZIP with manifest).</li>
-                                    <li>Do not put private info in unencrypted fields.</li>
-                                    <li>Keep device IDs/serials if relevant for physical items.</li>
-                                </ul>
-                            </div>
+                    <div class="card mt-3">
+                        <div class="card-status-top bg-blue"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">Good practice</h3>
+                            <ul class="text-secondary mb-0">
+                                <li>Do not put private info in unencrypted fields.</li>
+                                <li>Keep device IDs/serials if relevant for physical items.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 {/block}

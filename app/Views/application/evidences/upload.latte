@@ -21,12 +21,18 @@
                         <li class="breadcrumb-item" aria-current="page">
                             <a href="/cases/{$case->id}/evidences/{$evidence->id}">{$evidence->id}</a>
                         </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <a href="#">Upload</a>
+                        </li>
                     </ol>
                 </div>
                 <div class="d-flex align-items-center gap-2">
 
                     <div>
                         <h2 class="page-title mb-0">Upload encrypted file</h2>
+                        <div class="text-secondary small">
+                            Case ID {$case->id} • Jurisdiction <code>{$case->jurisdiction}</code>
+                        </div>
                     </div>
                 </div>
             </div>
