@@ -201,7 +201,6 @@
                           <th>Kind</th>
                           <th>Status</th>
                           <th>Custodian</th>
-                          <th>Anchored</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -238,20 +237,6 @@
                           </td>
                           <td>
                             <code>{$custodianShort}</code>
-                          </td>
-                          <td>
-                            {if $anchored}
-                              <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-green-lt">Yes</span>
-                                <a class="text-secondary small"
-                                   href="https://sepolia.etherscan.io/tx/{$ev->anchor_tx}"
-                                   target="_blank" rel="noreferrer">
-                                  {=substr($ev->anchor_tx,0,10)}...{=substr($ev->anchor_tx,-6)}
-                                </a>
-                              </div>
-                            {else}
-                              <span class="badge bg-yellow-lt">No</span>
-                            {/if}
                           </td>
                         </tr>
                       {/foreach}
