@@ -5,98 +5,95 @@
 {varType ?string $filter_q}
 
 {block content}
-<div class="page-header d-print-none">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <h2 class="page-title">Cases</h2>
-        <div class="text-secondary mt-1">
-          Browse and manage your cases. Use search and filters to narrow results.
+<div class="page-header">
+
+  <div class="row align-items-center mw-100">
+    <div class="col">
+      <div class="mb-1">
+        <ol class="breadcrumb" aria-label="breadcrumbs">
+          <li class="breadcrumb-item active">
+            <a href="#">Cases</a>
+          </li>
+        </ol>
+      </div>
+      <div >
+        <div class="page-title text-truncate">Cases</div>
+        <div class="text-secondary small">
+            Browse and manage your cases. Use search and filters to narrow results.
         </div>
       </div>
-      <div class="col-auto ms-auto d-print-none">
-        <a href="/cases/new" class="btn btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-               viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z"/>
-            <path d="M12 5l0 14" />
-            <path d="M5 12l14 0" />
-          </svg>
-          New case
+    </div>
+    <div class="col-auto pe-0">
+      <div class="btn-list">
+        <a href="/cases/new" class="btn d-none d-md-inline-flex">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-briefcase"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg>
+          Add case
         </a>
       </div>
     </div>
-
-    <!-- Filters -->
-    <div class="row g-2 align-items-end mt-2">
-      <div class="col-12">
-        <form class="row g-2" method="get" action="/cases" nocsrf="true">
-          <div class="col-md-4">
-            <label class="form-label">Search</label>
-            <div class="input-icon">
-              <span class="input-icon-addon">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                     viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                     stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z"/>
-                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                  <path d="M21 21l-6 -6" />
-                </svg>
-              </span>
-              <input type="text" class="form-control" name="q" placeholder="Title or ref code…"
-                     value="{$filter_q}">
-            </div>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Status</label>
-            <select class="form-select" name="status">
-              <option value="" {if !$filter_status}selected{/if}>Any</option>
-              <option value="OPEN" {if $filter_status === 'OPEN'}selected{/if}>Open</option>
-              <option value="CLOSED" {if $filter_status === 'CLOSED'}selected{/if}>Closed</option>
-              <option value="ARCHIVED" {if $filter_status === 'ARCHIVED'}selected{/if}>Archived</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">&nbsp;</label>
-            <div class="d-flex gap-2">
-              <button class="btn btn-primary" type="submit">Apply</button>
-              <a class="btn btn-light" href="/cases">Reset</a>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
   </div>
 </div>
 
 <div class="page-body">
-  <div class="container-xl">
 
-    {if count($cases) === 0}
-      <div class="empty">
-        <div class="empty-img">
-            {include "zf-undraw", localize("collecting")}
-        </div>
-        <p class="empty-title">No cases found</p>
-        <p class="empty-subtitle text-secondary">
-          Try adjusting your filters, or create your first case.
-        </p>
-        <div class="empty-action">
-          <a href="/cases/new" class="btn btn-primary">
-            Create case
-          </a>
-        </div>
-      </div>
-    {else}
-      <div class="card">
-        <div class="card-body p-0">
-          <div class="table-responsive">
+  <div n:if="count($cases) === 0" class="empty">
+    <div class="empty-img">
+        {include "zf-undraw", localize("collecting")}
+    </div>
+    <p class="empty-title">No cases found</p>
+    <p class="empty-subtitle text-secondary">
+      Try adjusting your filters, or create your first case.
+    </p>
+    <div class="empty-action">
+      <a href="/cases/new" class="btn btn-primary">
+        Create case
+      </a>
+      <a href="/cases" class="btn btn-primary">
+        All cases
+      </a>
+    </div>
+  </div>
+    <div n:else class="card">
+        <div class="card-table">
+            <div class="card-header">
+                <form class="row w-100 g-2" method="get" action="/cases" nocsrf="true">
+                  <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <div class="input-icon">
+                      <span class="input-icon-addon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+                             viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                             stroke-linecap="round" stroke-linejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z"/>
+                          <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                          <path d="M21 21l-6 -6" />
+                        </svg>
+                      </span>
+                      <input type="text" class="form-control" name="q" placeholder="Title or ref code…"
+                             value="{$filter_q}">
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" name="status">
+                      <option value="" {if !$filter_status}selected{/if}>Any</option>
+                      <option value="OPEN" {if $filter_status === 'OPEN'}selected{/if}>Open</option>
+                      <option value="CLOSED" {if $filter_status === 'CLOSED'}selected{/if}>Closed</option>
+                      <option value="ARCHIVED" {if $filter_status === 'ARCHIVED'}selected{/if}>Archived</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                      <button class="btn" type="submit">Apply</button>
+                    </div>
+                  </div>
+                </form>
+            </div>
+            <div class="table-responsive">
             <table class="table table-vcenter card-table">
               <thead>
                 <tr>
-                  <th style="width: 1%"></th>
                   <th>Title</th>
                   <th>Status</th>
                   <th>Visibility</th>
@@ -124,11 +121,6 @@
                   $sensClass = ($c->sensitivity === 'SEALED') ? 'bg-red-lt' : 'bg-green-lt';
                 }
                 <tr>
-                  <td>
-                    <span class="avatar avatar-sm avatar-rounded bg-blue-lt">
-                      {=substr($c->ref_code ?? 'C', 0, 1)}
-                    </span>
-                  </td>
                   <td>
                     <div class="text-reset">
                       <a href="/cases/{$c->id}" class="fw-bold">{$c->title}</a>
@@ -160,9 +152,6 @@
             </table>
           </div>
         </div>
-      </div>
-    {/if}
-
-  </div>
+    </div>
 </div>
 {/block}

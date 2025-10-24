@@ -4,123 +4,131 @@
 
 {block content}
     <div class="page-header d-print-none">
-        <div class="container-xl">
-            <div class="row g-2 align-items-center">
-                <div class="col">
-                    <h2 class="page-title">
-                        New Case
-                    </h2>
-                    <div class="text-secondary mt-1">
-                        Create a logical container to group evidence and manage access.
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="mb-1">
+                    <ol class="breadcrumb" aria-label="breadcrumbs">
+                        <li class="breadcrumb-item">
+                            <a href="/cases">Cases</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <a href="#">New case</a>
+                        </li>
+                    </ol>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div>
+                        <h2 class="page-title mb-0">Create a case</h2>
+                        <div class="text-secondary small">
+                            Create a logical container to group evidence and manage access.
+                        </div>
                     </div>
                 </div>
-                <div class="col-auto ms-auto d-print-none">
-                    <a href="/cases" class="btn btn-light">
-                        ← Back to cases
-                    </a>
-                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a class="btn" href="/cases">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                        <path d="M15 6l-6 6l6 6"></path>
+                    </svg>
+                    Back to cases</a>
             </div>
         </div>
     </div>
 
     <div class="page-body">
-        <div class="container-xl">
-            <div class="row row-deck row-cards">
-                <div class="col-12 col-lg-8">
-                    <form action="/cases" method="post" class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Case details</h3>
-                        </div>
-                        <div class="card-body">
-                            {include "zf-flash"}
-                            <div class="row g-3">
-                                <div class="col-md-8">
-                                    {include "zf-field-text", "Title", "title", [
-                                        placeholder: "e.g. People vs. Doe — Digital Forensics",
-                                        required: true,
-                                        hint: "Human-friendly name for this case. You can change it later."
-                                    ]}
-                                </div>
-
-                                <div class="col-md-4">
-                                    {include "zf-field-text", "Jurisdiction", "jurisdiction", [
-                                        placeholder: "e.g. CA-QC",
-                                        required: true,
-                                        default: $default_jurisdiction,
-                                        hint: "Two-part code (Country-Region), e.g. <code>CA-QC</code>, <code>US-CA</code>."
-                                    ]}
-                                </div>
-
-                                <div class="col-12">
-                                    {include "zf-field-textarea", "Description", "description", [
-                                        placeholder: "Short context for the case (non-sensitive; detailed evidence is added later).",
-                                        rows: "4",
-                                        hint: "Keep details high-level; evidence records will contain precise artifacts."
-                                    ]}
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label">Visibility</label>
-                                    <select name="visibility" class="form-select">
-                                        <option value="PRIVATE" selected>Private (participants only)</option>
-                                        <option value="ORG">Organization (any member of your org)</option>
-                                        <option value="PUBLIC">Public (discoverable)</option>
-                                    </select>
-                                    <small class="form-hint">
-                                        Controls who can discover this case in listings (content access still follows roles).
-                                    </small>
-                                </div>
-
-                                <!-- Sensitivity -->
-                                <div class="col-md-6">
-                                    <label class="form-label">Sensitivity</label>
-                                    <select name="sensitivity" class="form-select">
-                                        <option value="NORMAL" selected>Normal</option>
-                                        <option value="SEALED">Sealed (minimize detail exposure in UI)</option>
-                                    </select>
-                                    <small class="form-hint">
-                                        Sealed cases reduce detail exposure for non-participants.
-                                    </small>
-                                </div>
+        <div class="row row-deck row-cards">
+            <div class="col-12 col-lg-8">
+                <form action="/cases" method="post" class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Case details</h3>
+                    </div>
+                    <div class="card-body">
+                        {include "zf-flash"}
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                {include "zf-field-text", "Title", "title", [
+                                    placeholder: "e.g. People vs. Doe — Digital Forensics",
+                                    required: true
+                                ]}
                             </div>
-                        </div>
 
-                        <div class="card-footer d-flex align-items-center">
-                            <button type="submit" class="btn btn-primary ms-auto">
-                                Create case
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="col-12 col-lg-4 mt-3">
-                    <div>
-                        <div class="card">
-                            <div class="card-status-top bg-primary"></div>
-                            <div class="card-body">
-                                <h3 class="card-title">What gets stored?</h3>
-                                <div class="text-secondary">
-                                    Cases are off-chain containers. Only evidence anchors and custody transfers touch the blockchain.
-                                    You can still produce a tamper-evident snapshot later if required.
-                                </div>
+                            <div class="col-md-4">
+                                {include "zf-field-text", "Jurisdiction", "jurisdiction", [
+                                    placeholder: "e.g. CA-QC",
+                                    required: true,
+                                    default: $default_jurisdiction
+                                ]}
                             </div>
-                        </div>
 
-                        <div class="card mt-3">
-                            <div class="card-status-top bg-green"></div>
-                            <div class="card-body">
-                                <h3 class="card-title">Access & roles</h3>
-                                <div class="text-secondary">
-                                    As the creator, you’re the <strong>Owner</strong>. Add participants on the case page and set roles
-                                    (<em>Editor</em> or <em>Viewer</em>). Visibility controls discovery; roles control capabilities.
-                                </div>
+                            <div class="col-12">
+                                {include "zf-field-textarea", "Description", "description", [
+                                    placeholder: "Short context for the case (non-sensitive; detailed evidence is added later).",
+                                    rows: "4",
+                                    hint: "Keep details high-level; evidence records will contain precise artifacts."
+                                ]}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Visibility</label>
+                                <select name="visibility" class="form-select">
+                                    <option value="PRIVATE" selected>Private (participants only)</option>
+                                    <option value="ORG">Organization (any member of your org)</option>
+                                    <option value="PUBLIC">Public (discoverable)</option>
+                                </select>
+                                <small class="form-hint">
+                                    Controls who can discover this case in listings (content access still follows roles).
+                                </small>
+                            </div>
+
+                            <!-- Sensitivity -->
+                            <div class="col-md-6">
+                                <label class="form-label">Sensitivity</label>
+                                <select name="sensitivity" class="form-select">
+                                    <option value="NORMAL" selected>Normal</option>
+                                    <option value="SEALED">Sealed (minimize detail exposure in UI)</option>
+                                </select>
+                                <small class="form-hint">
+                                    Sealed cases reduce detail exposure for non-participants.
+                                </small>
                             </div>
                         </div>
                     </div>
 
+                    <div class="card-footer d-flex align-items-center">
+                        <button type="submit" class="btn btn-primary ms-auto">
+                            Create case
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-12 col-lg-4 mt-3">
+                <div>
+                    <div class="card">
+                        <div class="card-status-top bg-primary"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">What gets stored?</h3>
+                            <div class="text-secondary">
+                                Cases are off-chain containers. Only evidence anchors and custody transfers touch the blockchain.
+                                You can still produce a tamper-evident snapshot later if required.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-3">
+                        <div class="card-status-top bg-green"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">Access & roles</h3>
+                            <div class="text-secondary">
+                                As the creator, you’re the <strong>Owner</strong>. Add participants on the case page and set roles
+                                (<em>Editor</em> or <em>Viewer</em>). Visibility controls discovery; roles control capabilities.
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
+
         </div>
     </div>
 {/block}
