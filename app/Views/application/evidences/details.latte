@@ -59,11 +59,11 @@
     </div>
     <div class="col-auto">
       <div class="btn-list">
-        <a href="/cases/{$case->id}/evidences/{$evidence->id}/files/new" class="btn d-none d-md-inline-flex">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
-          Add file
-        </a>
         {if $evidence->status !== 'ANCHORED'}
+            <a href="/cases/{$case->id}/evidences/{$evidence->id}/files/new" class="btn d-none d-md-inline-flex">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-paperclip"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 7l-6.5 6.5a1.5 1.5 0 0 0 3 3l6.5 -6.5a3 3 0 0 0 -6 -6l-6.5 6.5a4.5 4.5 0 0 0 9 9l6.5 -6.5" /></svg>
+              Add file
+            </a>
             <button id="btn-anchor" class="btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-currency-ethereum"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 12l6 -9l6 9l-6 9z" /><path d="M6 12l6 -3l6 3l-6 2z" /></svg>
               Anchor
@@ -133,32 +133,26 @@
                   {/if}
                 </div>
               </div>
-
-              <div class="col-12">
-                <div class="text-secondary">On-chain fingerprint</div>
-                <div class="mt-1 small">
-                  <div>EvidenceId: <code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->evidence_id_hex ?? '—'}</code></div>
-                  <div>Content hash: <code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->content_hash ?? '—'}</code></div>
-                  <div>Media URI: <code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->media_uri ?? '—'}</code></div>
-                </div>
-              </div>
-
-              <div class="col-12">
-                <div class="text-secondary">Anchoring</div>
-                <div class="mt-1 small">
-                  {if $isAnchored}
-                    <div>
-                      Tx: <a href="{$explorer_tx_base}{$evidence->anchor_tx}" target="_blank" rel="noreferrer">
-                        <code>{=substr($evidence->anchor_tx,0,12)}...{=substr($evidence->anchor_tx,-6)}</code>
-                      </a>
-                    </div>
-                    <div>Anchored at: {$evidence->anchored_at|datetime}</div>
+              <div class="col-12 col-md-6">
+                <div class="text-secondary">Physical tag</div>
+                <div class="mt-1">
+                  {if $evidence->physical_tag}
+                    <span>{$evidence->physical_tag}</span>
                   {else}
-                    <span class="text-secondary">Not anchored yet.</span>
+                    <span class="text-secondary">—</span>
                   {/if}
                 </div>
               </div>
-
+              <div class="col-12 col-md-6">
+                <div class="text-secondary">Serial</div>
+                <div class="mt-1">
+                  {if $evidence->serial}
+                    <span>{$evidence->serial}</span>
+                  {else}
+                    <span class="text-secondary">—</span>
+                  {/if}
+                </div>
+              </div>
               <div class="col-12 text-secondary small">
                 <div>Created: {$evidence->created_at|datetime}</div>
                 <div>Updated: {$evidence->updated_at|datetime}</div>
@@ -173,6 +167,36 @@
           </div>
           <div class="card-body">
             {if $evidence->description !== ''}{$evidence->description}{else}<span class="text-secondary">No description.</span>{/if}
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-header">
+            <h3 class="card-title">On-chain information</h3>
+          </div>
+          <div class="card-body">
+            <div class="col-12">
+
+                  <div><div><b>EvidenceId</b></div><code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->evidence_id_hex ?? '—'}</code></div>
+                  <div class="mt-3"><div><b>Content hash</b></div><code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->content_hash ?? '—'}</code></div>
+                  <div class="mt-3"><div><b>Media URI</b></div><code class="d-inline-block text-truncate" style="max-width:100%;">{$evidence->media_uri ?? '—'}</code></div>
+
+              </div>
+              <hr>
+            <div class="col-12">
+
+                  {if $isAnchored}
+                    <div>
+                      Tx: <a href="{$explorer_tx_base}{$evidence->anchor_tx}" target="_blank" rel="noreferrer">
+                        <code>{=substr($evidence->anchor_tx,0,12)}...{=substr($evidence->anchor_tx,-6)}</code>
+                      </a>
+                    </div>
+                    <div>Anchored at: {$evidence->anchored_at|datetime}</div>
+                  {else}
+                    <span class="text-secondary">Not anchored yet.</span>
+                  {/if}
+
+              </div>
           </div>
         </div>
 
@@ -195,7 +219,7 @@
                           <div class="small text-muted mt-1" id="status-file-{$f->id}"></div>
                         </div>
 
-                        {if $f->encrypted}
+                        {if $evidence->status == 'ANCHORED'}
                           <button
                             class="btn btn-outline-primary btn-decrypt"
                             data-meta-url="/cases/{$case->id}/evidences/{$evidence->id}/files/{$f->id}/meta"
@@ -203,12 +227,6 @@
                             data-status-id="status-file-{$f->id}">
                             Decrypt & Download
                           </button>
-                        {else}
-                          <a
-                            class="btn btn-outline-secondary"
-                            href="/cases/{$case->id}/evidences/{$evidence->id}/files/{$f->id}/download">
-                            Download
-                          </a>
                         {/if}
                       </div>
                     {/foreach}
@@ -226,7 +244,7 @@
             {if count($events) === 0}
               <div class="text-secondary">No activity yet.</div>
             {else}
-              <ul class="steps steps-vertical">
+              <ul class="steps steps-vertical" style="margin-left: 0; padding-left: 0; border-left: none;">
                 {foreach $events as $ev}
                   <li class="step-item">
                     <div class="timeline-content">
