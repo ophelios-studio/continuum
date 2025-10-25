@@ -5,6 +5,7 @@ use Models\Account\Entities\Actor;
 use Models\Account\Services\ActorService;
 use Models\Core\Application;
 use Zephyrus\Application\Flash;
+use Zephyrus\Core\Configuration;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
 use Zephyrus\Network\Router\Get;
@@ -46,7 +47,7 @@ class SignupController extends Controller
             'ens_avatar' => Session::get('ens_avatar'),
             'ens_name' => Session::get('ens_name'),
             'actor' => $actor,
-            'submitter_address' => '0xdBfef357AaF020B9a1e8e4DB0E2b132875602163'
+            'submitter_address' => Configuration::read('services')["web3"]["submitter_registry_addr"]
         ]);
     }
 
