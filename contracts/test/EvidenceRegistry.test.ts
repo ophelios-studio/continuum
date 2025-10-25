@@ -130,4 +130,22 @@ describe("EvidenceRegistry", function () {
 
     expect(await evidence.currentCustodian(eid)).to.equal(custodianB.address);
   });
+
+  it("returns custody (auto-accept)", async function () {
+    const { ethers, submitter, custodianB, validator, submitterRegistry, evidence } = await deployAll();
+
+    // Register and anchor
+    const ph = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await submitterRegistry.connect(submitter).registerSubmitter(ph, "US-MA");
+    const eid = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    const ch = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await evidence.connect(submitter).anchorEvidence(eid, ch, "C-3", "US-MA", "IMG", "uri");
+
+    const note = "Returned to locker";
+    await expect(evidence.connect(submitter).returnCustody(eid, custodianB.address, note))
+      .to.emit(evidence, "CustodyReturned")
+      .withArgs(eid, submitter.address, custodianB.address, note, anyValue);
+
+    expect(await evidence.currentCustodian(eid)).to.equal(custodianB.address);
+  });
 });
