@@ -27,7 +27,7 @@ export async function decryptEvidenceFile({ metaUrl, downloadUrl }) {
             chain
         } = {}
     } = meta;
-
+    console.log(meta);
     if (!dataToEncryptHash) throw new Error('Missing dataToEncryptHash in metadata');
 
     const client = new LitNodeClient({ litNetwork: LIT_NETWORK.Datil });
@@ -52,7 +52,9 @@ export async function decryptEvidenceFile({ metaUrl, downloadUrl }) {
         authSig
     };
 
+    console.log("Going to decrypt ...");
     const { decryptedFile } = await decryptToFile(payload, client);
+    console.log("Decrypted! ...");
     return {
         blob: decryptedFile,
         filename: filename.replace(/\.enc$/i, ''),
