@@ -1,0 +1,126 @@
+{layout ../../layouts/main.latte}
+
+{varType Models\Legal\Entities\LegalCase $case}
+{varType Models\Legal\Entities\Evidence $evidence}
+
+{block content}
+    <div class="page-header d-print-none">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="mb-1">
+                    <ol class="breadcrumb" aria-label="breadcrumbs">
+                        <li class="breadcrumb-item">
+                            <a href="/cases">Cases</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="/cases/{$case->id}">{$case->ref_code}</a>
+                        </li>
+                        <li class="breadcrumb-item" aria-current="page">
+                            <a href="/cases/{$case->id}/evidences/{$evidence->id}">{$evidence->id}</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            <a href="#">Custody</a>
+                        </li>
+                    </ol>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+
+                    <div>
+                        <h2 class="page-title mb-0">Transfer custody</h2>
+                        <div class="text-secondary small">
+                            Case ID {$case->id} • Jurisdiction <code>{$case->jurisdiction}</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a class="btn" href="/cases/{$case->id}/evidences/{$evidence->id}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
+                        <path d="M15 6l-6 6l6 6"></path>
+                    </svg>
+                    Back to evidence</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-body">
+
+            <div class="row row-cards">
+                <div class="col-12 col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Start transfer</h3>
+                        </div>
+                        <div class="card-body">
+                            {include "zf-flash"}
+                            <div class="mb-3">
+                                <label class="form-label required">New custodian (wallet address)</label>
+                                <input type="text" id="toAddress" class="form-control" placeholder="0x…" inputmode="text" autocomplete="off" required>
+                                <div class="form-hint">Ethereum address of the new custodian (must accept the transfer to take effect).</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label required">Custody policy (not implemented yet)</label>
+                                <select id="policy" class="form-select" required>
+                                    <option value="1">Temporary – must be returned by date</option>
+                                    <option value="2">Permanent – no auto return</option>
+                                    <option value="3">View-only – cannot re-transfer</option>
+                                </select>
+                                <div class="form-hint">Choose how the custodian is allowed to hold or act on the evidence.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Expected return</label>
+                                <input type="datetime-local" id="expectedReturn" class="form-control">
+                                <div class="form-hint">Only used for Temporary policy. Leave empty otherwise.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Purpose / note</label>
+                                <textarea id="note" class="form-control" rows="3" placeholder="e.g., Expert review, discovery disclosure, chain-of-custody handoff"></textarea>
+                            </div>
+
+                            <div id="xStatus" class="small text-muted"></div>
+                        </div>
+                        <div class="card-footer d-flex">
+                            <button id="btnTransfer" class="btn btn-primary ms-auto" {if $evidence->status !== 'ANCHORED'}disabled{/if}>
+                                Initiate transfer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-4 mt-4">
+                    <div class="card">
+                        <div class="card-status-top bg-teal"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">How custody transfer works</h3>
+                            <ol class="text-secondary mb-3">
+                                <li>You propose a transfer to a recipient wallet.</li>
+                                <li>The transfer is recorded off-chain and an on-chain <em>pending</em> state is expected.</li>
+                                <li>The recipient must accept custody to become the new custodian.</li>
+                                <li>Once accepted, only the new custodian can decrypt files and perform further transfers.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-status-top bg-teal"></div>
+                        <div class="card-body">
+                            <h3 class="card-title">Custody policies</h3>
+                            <div class="text-secondary">
+                                <dl class="mb-3">
+                                    <dt class="fw-bold">Temporary</dt>
+                                    <dd class="mb-2">Custodian must return by the specified date. Used for lab analysis, external review, etc.</dd>
+                                    <dt class="fw-bold">Permanent</dt>
+                                    <dd class="mb-2">No auto-return. Use when custody is permanently assigned (e.g., court clerk).</dd>
+                                    <dt class="fw-bold">View-only</dt>
+                                    <dd>Custodian can access/decrypt files but cannot transfer custody to others.</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+{/block}

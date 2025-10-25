@@ -52,6 +52,41 @@ class EvidenceController extends AppController
         ]);
     }
 
+    #[Get("/{id}/custody")]
+    public function custodyForm(string $caseId, string $id): Response
+    {
+        $actor = Actor::build(Session::get('actor'));
+        $cases = new LegalCaseService();
+        $case = $cases->findById($caseId);
+        if (!$case) {
+            Flash::error("The specified case was not found or you don't have access to it.");
+            return $this->redirect("/cases");
+        }
+
+        $isParticipant = $cases->isParticipant($caseId, $actor->address);
+        $orgId = $actor->organization_id;
+        $discoverable =
+            ($case->visibility === 'PUBLIC') ||
+            ($case->visibility === 'ORG' && $orgId && $orgId === $case->organization_id);
+
+        if (!$isParticipant && !$discoverable) {
+            Flash::error("You do not have access to this case.");
+            return $this->redirect("/cases");
+        }
+
+        $evs = new EvidenceService();
+        $evidence = $evs->findById($id);
+        if (!$evidence) {
+            Flash::error("Evidence not found.");
+            return $this->redirect('/cases/' . $caseId);
+        }
+
+        return $this->render("application/evidences/custody", [
+            'case' => $case,
+            'evidence' => $evidence
+        ]);
+    }
+
     #[Get('/{id}')]
     public function show(string $caseId, string $id): Response
     {
