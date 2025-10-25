@@ -41,7 +41,11 @@ final readonly class LegalCaseService
         //LegalCaseValidator::assertInsert($form);
         $id = $this->cases->insert($form->buildObject(), $creator);
         $case = $this->findById($id);
-        $this->participants->add($id, $case->created_by, 'OWNER', $case->organization_id);
+        $this->participants->add($id, (object) [
+            'address' => $case->created_by,
+            'role' => 'OWNER',
+            'org_id' => $case->organization_id
+        ]);
         $this->events->add($id, $case->created_by, 'CASE_CREATED', [
             'title' => $case->title,
             'jurisdiction' => $case->jurisdiction,
