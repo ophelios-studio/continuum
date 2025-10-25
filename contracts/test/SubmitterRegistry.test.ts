@@ -135,4 +135,37 @@ describe("SubmitterRegistry", function () {
 
     expect((await registry.submitters(user1.address)).level).to.equal(1n);
   });
+
+  it("admin can pause/unpause; pause blocks state-changing functions", async function () {
+    const { ethers, registry, admin, user1, validator } = await deploy();
+
+    await expect(registry.connect(admin).pause()).to.emit(registry, "Paused");
+
+    await expect(
+      registry.connect(user1).registerSubmitter(ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`, "US-MA")
+    ).to.be.revertedWithCustomError(registry, "EnforcedPause");
+
+    await expect(
+      registry.connect(validator).verifySubmitter(user1.address, 2, 0, 0)
+    ).to.be.revertedWithCustomError(registry, "EnforcedPause");
+
+    await expect(registry.connect(admin).unpause()).to.emit(registry, "Unpaused");
+
+    await expect(
+      registry.connect(user1).registerSubmitter(ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`, "US-MA")
+    ).to.emit(registry, "SubmitterRegistered");
+  });
+
+  it("verifies only ADMIN role can pause/unpause", async function () {
+    const { registry, user1 } = await deploy();
+
+    await expect(registry.connect(user1).pause()).to.be.revertedWithCustomError(
+      registry,
+      "AccessControlUnauthorizedAccount"
+    );
+    await expect(registry.connect(user1).unpause()).to.be.revertedWithCustomError(
+      registry,
+      "AccessControlUnauthorizedAccount"
+    );
+  });
 });
