@@ -262,4 +262,35 @@ describe("EvidenceRegistry", function () {
       .to.emit(evidence, "CustodyAccepted")
       .withArgs(eid, submitter.address, custodianB.address, anyValue);
   });
+
+  it("custody chain across 4 accounts", async function () {
+    const { ethers, submitter, other, custodianB, stranger, submitterRegistry, evidence } = await deployAll();
+
+    // A = submitter, B = custodianB, C = other, D = stranger
+    const ph = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await submitterRegistry.connect(submitter).registerSubmitter(ph, "US-CA");
+    const eid = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    const ch = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await evidence.connect(submitter).anchorEvidence(eid, ch, "C-7", "US-CA", "DOC", "uri");
+
+    // A -> B
+    await evidence
+      .connect(submitter)
+      .initiateTransfer(eid, custodianB.address, "A2B", 0, ethers.ZeroHash as `0x${string}`);
+    await evidence.connect(custodianB).acceptCustody(eid);
+
+    // B -> C
+    await evidence
+      .connect(custodianB)
+      .initiateTransfer(eid, other.address, "B2C", 0, ethers.ZeroHash as `0x${string}`);
+    await evidence.connect(other).acceptCustody(eid);
+
+    // C -> D
+    await evidence
+      .connect(other)
+      .initiateTransfer(eid, stranger.address, "C2D", 0, ethers.ZeroHash as `0x${string}`);
+    await evidence.connect(stranger).acceptCustody(eid);
+
+    expect(await evidence.currentCustodian(eid)).to.equal(stranger.address);
+  });
 });
