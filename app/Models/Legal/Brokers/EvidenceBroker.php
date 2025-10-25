@@ -74,8 +74,7 @@ final class EvidenceBroker extends Broker
                 SET evidence_id_hex = :hex,
                     content_hash = :ch,
                     media_uri = :uri,
-                    anchor_tx = :tx,
-                    anchored_at = COALESCE(:anchored_at, NOW()),
+                    anchor_tx = :tx,                    
                     status = 'ANCHORED',
                     updated_at = NOW(),
                     anchored_at = NOW()

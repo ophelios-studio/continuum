@@ -2,6 +2,7 @@
 
 use Models\Account\Entities\Actor;
 use Models\Legal\Services\EvidenceService;
+use Zephyrus\Application\Flash;
 use Zephyrus\Core\Configuration;
 use Zephyrus\Core\Session;
 use Zephyrus\Network\Response;
@@ -38,12 +39,15 @@ class EvidenceAnchorController extends AppController
         }
 
         return $this->json([
+            'evidenceId' => $evidence->id,
+            'caseId' => $evidence->case_id,
             'evidenceIdHex' => strtolower($evidence->evidence_id_hex),
+            'jurisdiction' => $evidence->jurisdiction,
+            'kind' => $evidence->kind,
             'contentHash' => strtolower($contentHash),
             'mediaUri' => $mediaUri,
             'chainId' => $chainId,
-            'registry' => $registry,
-            'functionName' => 'anchorEvidence'
+            'registry' => $registry
         ]);
     }
 
@@ -69,7 +73,7 @@ class EvidenceAnchorController extends AppController
             $txHash,
             $contentHash
         );
-
+        Flash::success("The evidence has been anchored successfully 🎉.");
         return $this->json(['ok' => true, 'txHash' => strtolower($txHash)]);
     }
 }

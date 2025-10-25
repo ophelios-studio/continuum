@@ -35,13 +35,9 @@
             <p class="mb-0">Do you wish to proceed with anchoring this evidence on-chain?</p>
             <div id="anchorStatus" class="small text-muted mt-3 mb-3"></div>
             <button class="btn btn-warning"
-                  id="btnAnchor"
-                  data-contract="{$evidence_registry_addr}"
-                  data-evidence-id="{$evidence->id ?? ''}"
-                  data-evidence-id-hash="{$evidence->evidence_id_hex ?? ''}"
-                  data-content-hash="{$evidence->content_hash ?? ''}"
-                  data-media-uri="{$evidence->media_uri ?? ''}"
-                  data-chain-id="{$chain_id}">
+                  id="anchorBtn"
+                  data-prepare-url="/cases/{$case->id}/evidences/{$evidence->id}/anchor/prepare"
+                  data-confirm-url="/cases/{$case->id}/evidences/{$evidence->id}/anchor/confirm">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-location-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11.512 17.023l-1.512 -3.023l-7 -3.5a.55 .55 0 0 1 0 -1l18 -6.5l-4.45 12.324" /><path d="M15 19l2 2l4 -4" /></svg>
                 Confirm & sign
             </button>
@@ -95,7 +91,7 @@
       </div>
     </div>
   </div>
-    <div n:ifcontent class="mt-5">{include "zf-flash"}</div>
+  <div n:ifcontent class="mt-5">{include "zf-flash"}</div>
 </div>
 
 <div class="page-body">
@@ -296,27 +292,8 @@
 </div>
 
 <script type="module" n:syntax="off" nonce="{nonce()}">
-  import { anchorEvidence } from '/javascripts/modules/anchorEvidence.js';
-
-  const btn = document.getElementById('btn-anchor');
-  const statusEl = document.getElementById('anchor-status');
-  const setStatus = (m) => { statusEl.textContent = m || ''; };
-
-  btn?.addEventListener('click', async () => {
-    btn.disabled = true;
-    try {
-      await anchorEvidence({
-        prepareUrl: '/cases/{$case->id}/evidences/{$evidence->id}/anchor/prepare',
-        confirmUrl: '/cases/{$case->id}/evidences/{$evidence->id}/anchor/confirm',
-        onStatus: setStatus
-      });
-      setTimeout(() => location.href = '/cases/{$case->id}/evidences/{$evidence->id}', 1000);
-    } catch (e) {
-      console.error(e);
-      setStatus(e?.message || 'Failed to anchor');
-      btn.disabled = false;
-    }
-  });
+    import { initAnchorButton } from '/javascripts/modules/Evidence.js';
+    initAnchorButton(document.getElementById('anchorBtn'));
 </script>
 
 <script type="module" nonce="{nonce()}" n:syntax="off">
