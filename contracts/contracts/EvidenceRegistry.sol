@@ -155,6 +155,12 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
         );
     }
 
+    function currentCustodian(bytes32 evidenceId) external view returns (address) {
+        EvidenceState storage s = _state[evidenceId];
+        require(s.exists, "evidence not found");
+        return s.currentCustodian;
+    }
+
     /**
      * @notice Initiate a transfer to `to`. Requires current custodian. The transfer becomes effective only after `to`
      * calls `acceptCustody`.
