@@ -199,4 +199,31 @@ describe("EvidenceRegistry", function () {
     await expect(evidence.stateOf(unknownId)).to.be.revertedWith("evidence not found");
     await expect(evidence.currentCustodian(unknownId)).to.be.revertedWith("evidence not found");
   });
+
+  it("admin can pause/unpause; pause blocks state-changing functions", async function () {
+    const { ethers, admin, submitter, other, submitterRegistry, evidence } = await deployAll();
+
+    // Prepare anchored evidence
+    const ph = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await submitterRegistry.connect(submitter).registerSubmitter(ph, "US-CA");
+    const eid = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    const ch = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+
+    await expect(evidence.connect(admin).pause()).to.emit(evidence, "Paused");
+
+    await expect(
+      evidence.connect(submitter).anchorEvidence(eid, ch, "C-5", "US-CA", "DOC", "uri")
+    ).to.be.revertedWithCustomError(evidence, "EnforcedPause");
+
+    await expect(evidence.connect(other).pause()).to.be.revertedWithCustomError(
+      evidence,
+      "AccessControlUnauthorizedAccount"
+    );
+
+    await expect(evidence.connect(admin).unpause()).to.emit(evidence, "Unpaused");
+
+    // Works again after unpause
+    await expect(evidence.connect(submitter).anchorEvidence(eid, ch, "C-5", "US-CA", "DOC", "uri"))
+      .to.emit(evidence, "EvidenceAnchored");
+  });
 });
