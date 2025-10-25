@@ -103,4 +103,31 @@ describe("EvidenceRegistry", function () {
       evidence.connect(other).anchorEvidence(evidenceId, contentHash, "C-1", "QC-CA", "DOC", "uri")
     ).to.be.revertedWithCustomError(evidence, "EnforcedPause");
   });
+
+  it("accept custody transfer", async function () {
+    const { ethers, submitter, validator, custodianB, submitterRegistry, evidence } = await deployAll();
+
+    // Register and anchor
+    const ph = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await submitterRegistry.connect(submitter).registerSubmitter(ph, "US-NY");
+    const eid = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    const ch = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await evidence.connect(submitter).anchorEvidence(eid, ch, "C-2", "US-NY", "FILE", "uri");
+
+    const purpose = "Forensics Lab";
+    const expectedReturnAt = BigInt(Math.floor(Date.now() / 1000) + 7 * 24 * 3600);
+    const ctx = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+
+    await expect(
+      evidence.connect(submitter).initiateTransfer(eid, custodianB.address, purpose, Number(expectedReturnAt), ctx)
+    )
+      .to.emit(evidence, "CustodyTransferInitiated")
+      .withArgs(eid, submitter.address, custodianB.address, purpose, Number(expectedReturnAt), ctx);
+
+    await expect(evidence.connect(custodianB).acceptCustody(eid))
+      .to.emit(evidence, "CustodyAccepted")
+      .withArgs(eid, submitter.address, custodianB.address, anyValue);
+
+    expect(await evidence.currentCustodian(eid)).to.equal(custodianB.address);
+  });
 });
