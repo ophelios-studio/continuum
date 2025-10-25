@@ -27,7 +27,7 @@ export async function encrypt({file, registry, evidenceIdHex, uploadUrl, chain =
                 type: 'function'
             },
             returnValueTest: {
-                "key": "",
+                key: "",
                 comparator: '=',
                 value: ':userAddress'
             }
