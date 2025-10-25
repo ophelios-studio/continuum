@@ -74,6 +74,14 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
         uint64 returnedAt
     );
 
+    /// Emitted when a pending custodian rejects a proposed transfer.
+    event CustodyRejected(
+        bytes32 indexed evidenceId,
+        address indexed from,
+        address indexed to,
+        uint64 rejectedAt
+    );
+
     constructor(address admin, ISubmitterRegistry registry) {
         require(address(registry) != address(0), "registry required");
         _grantRole(ADMIN_ROLE, admin);
@@ -221,5 +229,22 @@ contract EvidenceRegistry is AccessControl, Pausable, ReentrancyGuard {
         s.pendingCustodian = address(0);
 
         emit CustodyReturned(evidenceId, from, to, note, uint64(block.timestamp));
+    }
+
+    /**
+     * @notice Reject a pending transfer. Caller must be the pending custodian.
+     *         Effect: clears pendingCustodian; currentCustodian remains unchanged.
+     */
+    function rejectCustody(bytes32 evidenceId) external whenNotPaused nonReentrant {
+        EvidenceState storage s = _state[evidenceId];
+        require(s.exists, "evidence not found");
+        require(s.pendingCustodian != address(0), "no pending transfer");
+        address from = s.currentCustodian;
+        address to = s.pendingCustodian;
+        require(msg.sender == to, "only pending custodian");
+
+        s.pendingCustodian = address(0);
+
+        emit CustodyRejected(evidenceId, from, to, uint64(block.timestamp));
     }
 }
