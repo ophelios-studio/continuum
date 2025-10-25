@@ -192,4 +192,11 @@ describe("EvidenceRegistry", function () {
       evidence.connect(submitter).returnCustody(eid, ethers.ZeroAddress, "n")
     ).to.be.revertedWith("bad recipient");
   });
+
+  it("reverts for unknown evidence ids in views", async function () {
+    const { ethers, evidence } = await deployAll();
+    const unknownId = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await expect(evidence.stateOf(unknownId)).to.be.revertedWith("evidence not found");
+    await expect(evidence.currentCustodian(unknownId)).to.be.revertedWith("evidence not found");
+  });
 });
