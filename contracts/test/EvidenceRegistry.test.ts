@@ -148,4 +148,48 @@ describe("EvidenceRegistry", function () {
 
     expect(await evidence.currentCustodian(eid)).to.equal(custodianB.address);
   });
+
+  it("reverts on invalid actions and bad recipients", async function () {
+    const { ethers, submitter, other, custodianB, submitterRegistry, evidence } = await deployAll();
+
+    const ph = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await submitterRegistry.connect(submitter).registerSubmitter(ph, "US-WA");
+    const eid = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    const ch = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await evidence.connect(submitter).anchorEvidence(eid, ch, "C-4", "US-WA", "DOC", "uri");
+
+    // Only current custodian can initiate
+    await expect(
+      evidence.connect(other).initiateTransfer(eid, custodianB.address, "p", 0, ethers.ZeroHash as `0x${string}`)
+    ).to.be.revertedWith("only custodian");
+
+    // bad recipients
+    await expect(
+      evidence.connect(submitter).initiateTransfer(eid, ethers.ZeroAddress, "p", 0, ethers.ZeroHash as `0x${string}`)
+    ).to.be.revertedWith("bad recipient");
+    await expect(
+      evidence.connect(submitter).initiateTransfer(eid, submitter.address, "p", 0, ethers.ZeroHash as `0x${string}`)
+    ).to.be.revertedWith("bad recipient");
+
+    // No pending transfer
+    await expect(evidence.connect(custodianB).acceptCustody(eid)).to.be.revertedWith("no pending transfer");
+
+    // Initiate then only pending custodian may accept
+    await evidence
+      .connect(submitter)
+      .initiateTransfer(eid, custodianB.address, "p", 0, ethers.ZeroHash as `0x${string}`);
+
+    await expect(evidence.connect(other).acceptCustody(eid)).to.be.revertedWith("only pending custodian");
+
+    // returnCustody: only current custodian and bad recipients reverts
+    await expect(evidence.connect(other).returnCustody(eid, submitter.address, "n")).to.be.revertedWith(
+      "only custodian"
+    );
+    await expect(
+      evidence.connect(submitter).returnCustody(eid, submitter.address, "n")
+    ).to.be.revertedWith("bad recipient");
+    await expect(
+      evidence.connect(submitter).returnCustody(eid, ethers.ZeroAddress, "n")
+    ).to.be.revertedWith("bad recipient");
+  });
 });
