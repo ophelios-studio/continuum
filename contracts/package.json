@@ -2,6 +2,12 @@
   "name": "continuum-contracts",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "build": "hardhat build",
+    "compile": "hardhat compile",
+    "clean": "hardhat clean",
+    "test": "hardhat test"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-ignition": "^3.0.3",
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.0",
