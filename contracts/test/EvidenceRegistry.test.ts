@@ -226,4 +226,40 @@ describe("EvidenceRegistry", function () {
     await expect(evidence.connect(submitter).anchorEvidence(eid, ch, "C-5", "US-CA", "DOC", "uri"))
       .to.emit(evidence, "EvidenceAnchored");
   });
+
+  it("rejects custody transfer; clears pending and allows re-initiate", async function () {
+    const { ethers, submitter, custodianB, submitterRegistry, evidence } = await deployAll();
+
+    // Register and anchor
+    const ph = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await submitterRegistry.connect(submitter).registerSubmitter(ph, "US-NY");
+    const eid = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    const ch = ethers.hexlify(ethers.randomBytes(32)) as `0x${string}`;
+    await evidence.connect(submitter).anchorEvidence(eid, ch, "C-6", "US-NY", "FILE", "uri");
+
+    await expect(
+      evidence.connect(submitter).initiateTransfer(eid, custodianB.address, "Lab", 0, ethers.ZeroHash as `0x${string}`)
+    )
+      .to.emit(evidence, "CustodyTransferInitiated")
+      .withArgs(eid, submitter.address, custodianB.address, "Lab", 0, ethers.ZeroHash);
+
+    await expect(evidence.connect(custodianB).rejectCustody(eid))
+      .to.emit(evidence, "CustodyRejected")
+      .withArgs(eid, submitter.address, custodianB.address, anyValue);
+
+    // Accept should fail now
+    await expect(evidence.connect(custodianB).acceptCustody(eid)).to.be.revertedWith("no pending transfer");
+
+    // Current custodian stays the same (submitter)
+    expect(await evidence.currentCustodian(eid)).to.equal(submitter.address);
+
+    // Can re-initiate and accept
+    await evidence
+      .connect(submitter)
+      .initiateTransfer(eid, custodianB.address, "Lab2", 0, ethers.ZeroHash as `0x${string}`);
+
+    await expect(evidence.connect(custodianB).acceptCustody(eid))
+      .to.emit(evidence, "CustodyAccepted")
+      .withArgs(eid, submitter.address, custodianB.address, anyValue);
+  });
 });
